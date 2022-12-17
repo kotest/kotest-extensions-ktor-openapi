@@ -23,7 +23,7 @@ dependencies {
    implementation("io.swagger.parser.v3:swagger-parser:2.1.3")
    testImplementation("io.ktor:ktor-client-apache:2.1.2")
    testImplementation("io.kotest:kotest-runner-junit5:5.5.1")
-   testImplementation("io.kotest:kotest-assertions-core:5.5.1")
+   testImplementation("io.kotest:kotest-assertions-core:5.5.4")
    testImplementation("io.ktor:ktor-server-test-host:2.1.2")
 }
 
