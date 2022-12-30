@@ -45,20 +45,22 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
    }
 
    on(CallSetup) { call ->
-      call.attributes.put(traceKey, Trace(null, emptyList(), call.request.httpMethod))
+      call.attributes.put(traceKey, Trace(call.request.httpMethod, null, emptyList(), null))
    }
 
    on(ResponseSent) { call ->
       if (call.response.status() != null && call.response.status() != HttpStatusCode.NotFound) {
          val trace = call.attributes[traceKey]
-         writer.generate(trace)
+         trace.response = call.response.status()
+         writer.addTrace(trace)
          writer.write(this.pluginConfig.path)
       }
    }
 }
 
 data class Trace(
+   val method: HttpMethod,
    var path: String?,
    var params: List<String>,
-   val method: HttpMethod,
+   var response: HttpStatusCode?,
 )

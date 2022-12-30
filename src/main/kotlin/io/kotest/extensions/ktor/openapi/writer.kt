@@ -5,20 +5,30 @@ import io.swagger.v3.core.util.Yaml
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
+import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.parameters.Parameter
+import io.swagger.v3.oas.models.responses.ApiResponse
+import io.swagger.v3.oas.models.responses.ApiResponses
 import java.nio.file.Files
 import java.nio.file.Path
 
 class OpenApiGenerator {
 
-   private val openapi = OpenAPI()
+   private val openapi = OpenAPI().also {
+      it.info = Info()
+      it.info.description = "my-service"
+      it.info.title = "my-service"
+      it.info.version = "1.0.0"
+   }
 
-   fun generate(trace: Trace) {
+   fun addTrace(trace: Trace) {
       val item = PathItem()
       val op = Operation()
+      op.responses = ApiResponses()
       trace.params.forEach {
          val p = Parameter()
          p.name = it
+         p.`in` = "path"
          op.addParametersItem(p)
       }
       when (trace.method) {
@@ -30,6 +40,7 @@ class OpenApiGenerator {
          HttpMethod.Post -> item.post = op
          HttpMethod.Put -> item.put = op
       }
+      op.responses.addApiResponse(trace.response!!.value.toString(), ApiResponse())
       openapi.path(trace.path, item)
    }
 
