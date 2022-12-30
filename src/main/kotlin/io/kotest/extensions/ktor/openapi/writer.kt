@@ -24,6 +24,7 @@ class OpenApiGenerator {
    fun addTrace(trace: Trace) {
       val item = PathItem()
       val op = Operation()
+      op.description = trace.description
       op.responses = ApiResponses()
       trace.params.forEach {
          val p = Parameter()
@@ -40,7 +41,9 @@ class OpenApiGenerator {
          HttpMethod.Post -> item.post = op
          HttpMethod.Put -> item.put = op
       }
-      op.responses.addApiResponse(trace.response!!.value.toString(), ApiResponse())
+      val resp = ApiResponse()
+      resp.description = trace.response!!.description
+      op.responses.addApiResponse(trace.response!!.value.toString(), resp)
       openapi.path(trace.path, item)
    }
 

@@ -23,7 +23,10 @@ class OpenApiTest : FunSpec() {
             }
             routing {
                route("/internal") {
-                  get("/foo1") { call.respond(HttpStatusCode.OK) }
+                  get("/foo1") {
+                     description("Returns the user identified by the foo param")
+                     call.respond(HttpStatusCode.OK)
+                  }
                }
                get("/with/param/{foo}") { call.respond(HttpStatusCode.OK) }
                post("/bar2") { call.respond(HttpStatusCode.OK) }

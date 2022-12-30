@@ -2,6 +2,8 @@ package io.kotest.extensions.ktor.openapi
 
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseSent
@@ -10,6 +12,7 @@ import io.ktor.server.routing.PathSegmentParameterRouteSelector
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
+import io.ktor.util.pipeline.PipelineContext
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -45,17 +48,24 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
    }
 
    on(CallSetup) { call ->
-      call.attributes.put(traceKey, Trace(call.request.httpMethod, null, emptyList(), null))
+      call.attributes.put(traceKey, Trace(call.request.httpMethod, null, emptyList(), null, null))
    }
 
    on(ResponseSent) { call ->
       if (call.response.status() != null && call.response.status() != HttpStatusCode.NotFound) {
          val trace = call.attributes[traceKey]
          trace.response = call.response.status()
+         trace.description = call.attributes.getOrNull(DescriptionKey)
          writer.addTrace(trace)
          writer.write(this.pluginConfig.path)
       }
    }
+}
+
+val DescriptionKey: AttributeKey<String> = AttributeKey("KotestOpenApiDescriptionKey")
+
+fun PipelineContext<*, ApplicationCall>.description(desc: String) {
+   call.attributes.put(DescriptionKey, desc)
 }
 
 data class Trace(
@@ -63,4 +73,5 @@ data class Trace(
    var path: String?,
    var params: List<String>,
    var response: HttpStatusCode?,
+   var description: String?,
 )
