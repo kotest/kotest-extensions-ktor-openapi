@@ -6,6 +6,8 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
@@ -43,6 +45,10 @@ class OpenApiGenerator {
       }
       val resp = ApiResponse()
       resp.description = trace.response!!.description
+      resp.content = Content()
+      val mediaType = MediaType()
+      mediaType.example = """{"name":"foo"}"""
+      resp.content.addMediaType("application/json", mediaType)
       op.responses.addApiResponse(trace.response!!.value.toString(), resp)
       openapi.path(trace.path, item)
    }
