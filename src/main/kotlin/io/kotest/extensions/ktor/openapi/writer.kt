@@ -32,6 +32,7 @@ class OpenApiGenerator {
          val p = Parameter()
          p.name = it
          p.`in` = "path"
+         p.example = trace.ps[it]
          op.addParametersItem(p)
       }
       when (trace.method) {

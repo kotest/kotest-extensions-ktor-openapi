@@ -30,13 +30,13 @@ class OpenApiTest : FunSpec() {
                      call.respond(HttpStatusCode.OK)
                   }
                }
-               get("/with/param/{foo}") { call.respond(HttpStatusCode.OK) }
+               get("/users/{foo}") { call.respond(HttpStatusCode.OK) }
                delete("/with/param1/{foo}/even/{param2}") { call.respond(HttpStatusCode.OK) }
                post("/bar2") { call.respond(HttpStatusCode.OK) }
             }
             client.get("/internal/foo1")
             client.post("/bar2").status shouldBe HttpStatusCode.OK
-            client.get("/with/param/abc").status shouldBe HttpStatusCode.OK
+            client.get("/users/154363").status shouldBe HttpStatusCode.OK
             client.delete("/with/param1/foo/even/param2").status shouldBe HttpStatusCode.OK
          }
       }

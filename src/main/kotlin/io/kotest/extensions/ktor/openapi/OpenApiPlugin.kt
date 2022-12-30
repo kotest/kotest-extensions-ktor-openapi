@@ -48,7 +48,7 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
    }
 
    on(CallSetup) { call ->
-      call.attributes.put(traceKey, Trace(call.request.httpMethod, null, emptyList(), null, null))
+      call.attributes.put(traceKey, Trace(call.request.httpMethod, null, emptyList(), null, null, emptyMap()))
    }
 
    on(ResponseSent) { call ->
@@ -56,6 +56,7 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
          val trace = call.attributes[traceKey]
          trace.response = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
+         trace.ps = trace.params.associateWith { call.parameters[it] }
          writer.addTrace(trace)
          writer.write(this.pluginConfig.path)
       }
@@ -74,4 +75,5 @@ data class Trace(
    var params: List<String>,
    var response: HttpStatusCode?,
    var description: String?,
+   var ps: Map<String, String?>,
 )
