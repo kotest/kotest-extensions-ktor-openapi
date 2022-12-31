@@ -7,9 +7,11 @@ import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseSent
+import io.ktor.server.auth.AuthenticationRouteSelector
 import io.ktor.server.request.httpMethod
 import io.ktor.server.routing.PathSegmentParameterRouteSelector
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RouteSelector
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelineContext
@@ -33,22 +35,32 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
 //      writer.write(this.pluginConfig.path)
 //   }
 
-   fun Route.params(): List<String> {
-      val params = parent?.params() ?: emptyList()
-      return when (val s = selector) {
-         is PathSegmentParameterRouteSelector -> params + s.name
-         else -> params
+   fun Route.selectors(): List<RouteSelector> {
+      return when (val parent = parent) {
+         null -> listOf(selector)
+         else -> parent.selectors() + selector
       }
+   }
+
+   fun Route.params(): List<String> {
+      return selectors().filterIsInstance<PathSegmentParameterRouteSelector>().map { it.name }
+   }
+
+   fun Route.authentication(): List<String> {
+      return selectors().filterIsInstance<AuthenticationRouteSelector>().flatMap { it.names }.filterNotNull()
    }
 
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
       trace.path = call.route.parent.toString()
       trace.params = call.route.params()
+      trace.authentications = call.route.authentication()
    }
 
    on(CallSetup) { call ->
-      call.attributes.put(traceKey, Trace(call.request.httpMethod, null, emptyList(), null, null, emptyMap()))
+      call.attributes.put(
+         traceKey, Trace(call.request.httpMethod, null, emptyList(), emptyList(), null, null, emptyMap())
+      )
    }
 
    on(ResponseSent) { call ->
@@ -73,6 +85,7 @@ data class Trace(
    val method: HttpMethod,
    var path: String?,
    var params: List<String>,
+   var authentications: List<String>,
    var response: HttpStatusCode?,
    var description: String?,
    var ps: Map<String, String?>,

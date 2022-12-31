@@ -2,6 +2,7 @@ package io.kotest.extensions.ktor.openapi
 
 import io.ktor.http.HttpMethod
 import io.swagger.v3.core.util.Yaml
+import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
+import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -21,6 +24,13 @@ class OpenApiGenerator {
       it.info.description = "my-service"
       it.info.title = "my-service"
       it.info.version = "1.0.0"
+
+      it.components = Components()
+      it.components.addSecuritySchemes("internal", SecurityScheme().also {
+         it.type = SecurityScheme.Type.APIKEY
+         it.`in` = SecurityScheme.In.HEADER
+         it.name = "x-api-key"
+      })
    }
 
    fun addTrace(trace: Trace) {
@@ -51,6 +61,15 @@ class OpenApiGenerator {
       mediaType.example = """{"name":"foo"}"""
       resp.content.addMediaType("application/json", mediaType)
       op.responses.addApiResponse(trace.response!!.value.toString(), resp)
+
+      if (trace.authentications.isNotEmpty()) {
+         trace.authentications.forEach {
+            val sec = SecurityRequirement()
+            sec.addList(it)
+            op.addSecurityItem(sec)
+         }
+      }
+
       openapi.path(trace.path, item)
    }
 
