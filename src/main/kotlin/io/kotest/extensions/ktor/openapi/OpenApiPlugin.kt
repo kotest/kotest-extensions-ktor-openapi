@@ -9,10 +9,15 @@ import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.auth.AuthenticationRouteSelector
 import io.ktor.server.request.httpMethod
+import io.ktor.server.routing.PathSegmentConstantRouteSelector
+import io.ktor.server.routing.PathSegmentOptionalParameterRouteSelector
 import io.ktor.server.routing.PathSegmentParameterRouteSelector
+import io.ktor.server.routing.PathSegmentTailcardRouteSelector
+import io.ktor.server.routing.PathSegmentWildcardRouteSelector
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.RouteSelector
 import io.ktor.server.routing.Routing
+import io.ktor.server.routing.TrailingSlashRouteSelector
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelineContext
 import java.nio.file.Path
@@ -55,9 +60,21 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
       return selectors().filterIsInstance<AuthenticationRouteSelector>().flatMap { it.names }.filterNotNull()
    }
 
+   fun Route.path() = selectors().mapNotNull {
+      when (it) {
+         is PathSegmentParameterRouteSelector -> it.toString()
+         is PathSegmentConstantRouteSelector -> it.toString()
+         is PathSegmentOptionalParameterRouteSelector -> it.toString()
+         is PathSegmentTailcardRouteSelector -> it.toString()
+         is PathSegmentWildcardRouteSelector -> it.toString()
+         is TrailingSlashRouteSelector -> it.toString()
+         else -> null
+      }
+   }.joinToString("/", prefix = "/")
+
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
-      trace.path = call.route.parent.toString()
+      trace.path = call.route.path()
       trace.params = call.route.params()
       trace.authentications = call.route.authentication()
    }
