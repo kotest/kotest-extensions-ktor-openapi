@@ -24,6 +24,7 @@ class OpenApiTest : FunSpec() {
          testApplication {
             install(OpenApi) {
                path = apiPath
+               authentication = mapOf("internal" to Authenticator.Header("My-Api-Key"))
             }
             install(Authentication) {
                basic("auth2") {

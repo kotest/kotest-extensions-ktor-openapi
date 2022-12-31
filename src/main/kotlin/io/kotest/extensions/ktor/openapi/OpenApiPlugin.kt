@@ -19,14 +19,19 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class OpenApiConfig(
-   var path: Path = Paths.get("./openapi.yml")
+   var path: Path = Paths.get("./openapi.yml"),
+   var authentication: Map<String, Authenticator> = emptyMap(),
 )
+
+sealed interface Authenticator {
+   data class Header(val name: String) : Authenticator
+}
 
 val OpenApiKey: AttributeKey<OpenApiConfig> = AttributeKey("OpenApiConfigAttributeKey")
 
 val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApiConfig) {
 
-   val writer = OpenApiGenerator()
+   val writer = OpenApiGenerator(pluginConfig)
    val traceKey = AttributeKey<Trace>("kotestOpenApiTrace")
 
 //   this.onCall { call ->

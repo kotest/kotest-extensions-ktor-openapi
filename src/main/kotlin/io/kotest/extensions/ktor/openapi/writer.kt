@@ -17,20 +17,25 @@ import io.swagger.v3.oas.models.security.SecurityScheme
 import java.nio.file.Files
 import java.nio.file.Path
 
-class OpenApiGenerator {
+class OpenApiGenerator(config: OpenApiConfig) {
 
-   private val openapi = OpenAPI().also {
-      it.info = Info()
-      it.info.description = "my-service"
-      it.info.title = "my-service"
-      it.info.version = "1.0.0"
-
-      it.components = Components()
-      it.components.addSecuritySchemes("internal", SecurityScheme().also {
-         it.type = SecurityScheme.Type.APIKEY
-         it.`in` = SecurityScheme.In.HEADER
-         it.name = "x-api-key"
-      })
+   private val openapi = OpenAPI().also { api ->
+      api.info = Info()
+      api.info.description = "my-service"
+      api.info.title = "my-service"
+      api.info.version = "1.0.0"
+      api.components = Components()
+      config.authentication.forEach { authenticator ->
+         api.components.addSecuritySchemes(authenticator.key, SecurityScheme().also {
+            when (val auth = authenticator.value) {
+               is Authenticator.Header -> {
+                  it.type = SecurityScheme.Type.APIKEY
+                  it.`in` = SecurityScheme.In.HEADER
+                  it.name = auth.name
+               }
+            }
+         })
+      }
    }
 
    fun addTrace(trace: Trace) {
