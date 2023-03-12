@@ -9,20 +9,20 @@ import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.auth.AuthenticationRouteSelector
 import io.ktor.server.request.httpMethod
-import io.ktor.server.routing.PathSegmentConstantRouteSelector
-import io.ktor.server.routing.PathSegmentOptionalParameterRouteSelector
 import io.ktor.server.routing.PathSegmentParameterRouteSelector
-import io.ktor.server.routing.PathSegmentTailcardRouteSelector
-import io.ktor.server.routing.PathSegmentWildcardRouteSelector
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.RouteSelector
 import io.ktor.server.routing.Routing
-import io.ktor.server.routing.TrailingSlashRouteSelector
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelineContext
 import java.nio.file.Path
 import java.nio.file.Paths
 
+/**
+ * Config class used by the plugin.
+ *
+ * Ktor does not provide a means to have access to authentication implementation,
+ * so we must add them here.
+ */
 class OpenApiConfig(
    var path: Path = Paths.get("./openapi.yml"),
    var authentication: Map<String, Authenticator> = emptyMap(),
@@ -45,12 +45,7 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
 //      writer.write(this.pluginConfig.path)
 //   }
 
-   fun Route.selectors(): List<RouteSelector> {
-      return when (val parent = parent) {
-         null -> listOf(selector)
-         else -> parent.selectors() + selector
-      }
-   }
+
 
    fun Route.params(): List<String> {
       return selectors().filterIsInstance<PathSegmentParameterRouteSelector>().map { it.name }
@@ -59,18 +54,6 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
    fun Route.authentication(): List<String> {
       return selectors().filterIsInstance<AuthenticationRouteSelector>().flatMap { it.names }.filterNotNull()
    }
-
-   fun Route.path() = selectors().mapNotNull {
-      when (it) {
-         is PathSegmentParameterRouteSelector -> it.toString()
-         is PathSegmentConstantRouteSelector -> it.toString()
-         is PathSegmentOptionalParameterRouteSelector -> it.toString()
-         is PathSegmentTailcardRouteSelector -> it.toString()
-         is PathSegmentWildcardRouteSelector -> it.toString()
-         is TrailingSlashRouteSelector -> it.toString()
-         else -> null
-      }
-   }.joinToString("/", prefix = "/")
 
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
