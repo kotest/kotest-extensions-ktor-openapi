@@ -7,9 +7,7 @@ import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseSent
-import io.ktor.server.auth.AuthenticationRouteSelector
 import io.ktor.server.request.httpMethod
-import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelineContext
@@ -27,13 +25,9 @@ class OpenApiConfig(
    var authentication: Map<String, Authenticator> = emptyMap(),
 )
 
-sealed interface Authenticator {
-   data class Header(val name: String) : Authenticator
-}
-
 val OpenApiKey: AttributeKey<OpenApiConfig> = AttributeKey("OpenApiConfigAttributeKey")
 
-val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApiConfig) {
+val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApiConfig) {
 
    val writer = OpenApiGenerator(pluginConfig)
    val traceKey = AttributeKey<Trace>("kotestOpenApiTrace")
