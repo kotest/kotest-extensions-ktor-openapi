@@ -15,15 +15,14 @@ import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import java.nio.file.Files
-import java.nio.file.Path
 
-class OpenApiWriter(config: OpenApiConfig) {
+class OpenApiWriter(private val config: OpenApiConfig) {
 
    private val openapi = OpenAPI().also { api ->
       api.info = Info()
-      api.info.description = "my-service"
-      api.info.title = "my-service"
-      api.info.version = "1.0.0"
+      api.info.description = config.serviceDescription
+      api.info.title = config.serviceTitle ?: "service-title"
+      api.info.version = config.serviceVersion ?: "0.0.0"
       api.components = Components()
       config.authentications.forEach { authenticator ->
          api.components.addSecuritySchemes(authenticator.key, SecurityScheme().also {
@@ -78,13 +77,8 @@ class OpenApiWriter(config: OpenApiConfig) {
       openapi.path(trace.path, item)
    }
 
-   fun write(path: Path) {
-      val factory = Yaml.mapper().factory
-//      factory.disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-//         .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
-//         .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
-//
+   fun write() {
       val yaml = Yaml.pretty().writeValueAsString(openapi)
-      Files.write(path, yaml.encodeToByteArray())
+      Files.write(config.path, yaml.encodeToByteArray())
    }
 }

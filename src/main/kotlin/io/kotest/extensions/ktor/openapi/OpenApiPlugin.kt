@@ -21,6 +21,9 @@ import java.nio.file.Paths
  */
 class OpenApiConfig(
    var path: Path = Paths.get("./myopenapi.yml"),
+   var serviceTitle: String? = null,
+   var serviceVersion: String? = null,
+   var serviceDescription: String? = null,
    var authentications: Map<String, Authenticator> = emptyMap(),
 )
 
