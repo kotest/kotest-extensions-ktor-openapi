@@ -34,6 +34,19 @@ class PathTest : FunSpec() {
          }
       }
 
+      test("Route.path should support nested parameters") {
+         testApplication {
+            routing {
+               route("/a") {
+                  route("/foo{userId}bar") {
+                     val r = get("/c") { }
+                     r.path() shouldBe "/a/foo{userId}bar/c"
+                  }
+               }
+            }
+         }
+      }
+
       test("Route.path should support and remove trailing slash") {
          testApplication {
             routing {

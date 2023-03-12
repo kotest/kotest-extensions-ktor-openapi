@@ -9,7 +9,6 @@ import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.auth.AuthenticationRouteSelector
 import io.ktor.server.request.httpMethod
-import io.ktor.server.routing.PathSegmentParameterRouteSelector
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
@@ -45,12 +44,6 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
 //      writer.write(this.pluginConfig.path)
 //   }
 
-
-
-   fun Route.params(): List<String> {
-      return selectors().filterIsInstance<PathSegmentParameterRouteSelector>().map { it.name }
-   }
-
    fun Route.authentication(): List<String> {
       return selectors().filterIsInstance<AuthenticationRouteSelector>().flatMap { it.names }.filterNotNull()
    }
@@ -58,7 +51,7 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
       trace.path = call.route.path()
-      trace.params = call.route.params()
+      trace.params = call.route.pathParameters()
       trace.authentications = call.route.authentication()
    }
 

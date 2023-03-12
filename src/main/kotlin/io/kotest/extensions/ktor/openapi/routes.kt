@@ -35,3 +35,10 @@ fun Route.path() = selectors().mapNotNull {
       else -> null
    }
 }.joinToString("/", prefix = "/").removeSuffix("/")
+
+/**
+ * Extracts the [RouteSelector]s for this [Route] and returns the path parameters.
+ */
+fun Route.pathParameters(): List<String> {
+   return selectors().filterIsInstance<PathSegmentParameterRouteSelector>().map { it.name }
+}
