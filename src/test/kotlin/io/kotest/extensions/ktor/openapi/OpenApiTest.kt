@@ -15,17 +15,26 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
+import java.nio.file.Path
 import java.nio.file.Paths
 
+class OpenApiCollector(
+   val path: Path,
+   val authentications: Map<String, Authenticator>,
+   val serviceName: String? = null,
+)
+
 class OpenApiTest : FunSpec() {
+
+   val collector = OpenApiCollector(
+      path = Paths.get("/home/sam/development/workspace/kotest/kotest-extensions-ktor-openapi/opentest.yml"),
+      authentications = mapOf("internal" to Authenticator.Header("My-Api-Key"))
+   )
+
    init {
       test("should generate routes for all method types") {
-         val apiPath = Paths.get("/home/sam/development/workspace/kotest/kotest-extensions-ktor-openapi/opentest.yml")
          testApplication {
-            install(OpenApi) {
-               path = apiPath
-               authentication = mapOf("internal" to Authenticator.Header("My-Api-Key"))
-            }
+            install(OpenApi)
             install(Authentication) {
                basic("auth2") {
                   this.realm = "myrealm"
