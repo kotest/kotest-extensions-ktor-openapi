@@ -1,5 +1,6 @@
 package io.kotest.extensions.ktor.openapi
 
+import io.ktor.server.auth.AuthenticationRouteSelector
 import io.ktor.server.routing.PathSegmentConstantRouteSelector
 import io.ktor.server.routing.PathSegmentOptionalParameterRouteSelector
 import io.ktor.server.routing.PathSegmentParameterRouteSelector
@@ -41,4 +42,12 @@ fun Route.path() = selectors().mapNotNull {
  */
 fun Route.pathParameters(): List<String> {
    return selectors().filterIsInstance<PathSegmentParameterRouteSelector>().map { it.name }
+}
+
+/**
+ * Extracts the [RouteSelector]s for this [Route] and returns the name of any authentication providers
+ * that have been applied.
+ */
+fun Route.authentication(): List<String> {
+   return selectors().filterIsInstance<AuthenticationRouteSelector>().flatMap { it.names }.filterNotNull()
 }

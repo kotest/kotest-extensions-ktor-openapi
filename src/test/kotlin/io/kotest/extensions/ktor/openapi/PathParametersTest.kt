@@ -8,7 +8,7 @@ import io.ktor.server.testing.testApplication
 
 class PathParametersTest : FunSpec() {
    init {
-      test("Route.selectors should return all path parameters from parameter selectors") {
+      test("Route.pathParameters should return all path parameters from parameter selectors") {
          testApplication {
             routing {
                route("/a") {

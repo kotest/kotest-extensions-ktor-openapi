@@ -44,10 +44,6 @@ val OpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApi
 //      writer.write(this.pluginConfig.path)
 //   }
 
-   fun Route.authentication(): List<String> {
-      return selectors().filterIsInstance<AuthenticationRouteSelector>().flatMap { it.names }.filterNotNull()
-   }
-
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
       trace.path = call.route.path()
