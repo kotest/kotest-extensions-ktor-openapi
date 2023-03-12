@@ -29,7 +29,7 @@ class OpenApiConfig(
 
 val OpenApiKey: AttributeKey<OpenApiConfig> = AttributeKey("OpenApiConfigAttributeKey")
 
-val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApiConfig) {
+val KotestOpenApi = createApplicationPlugin("OpenApi") {
 
    val traceKey = AttributeKey<Trace>("kotestOpenApiTrace")
 
@@ -43,13 +43,13 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
       trace.path = call.route.path()
-      trace.params = call.route.pathParameters()
+      trace.pathParameters = call.route.pathParameters()
       trace.authentications = call.route.authentication()
    }
 
    on(CallSetup) { call ->
       call.attributes.put(
-         traceKey, Trace(call.request.httpMethod, null, emptyList(), emptyList(), null, null, emptyMap())
+         traceKey, Trace(call.request.httpMethod, "", emptyList(), emptyList(), null, null, emptyMap())
       )
    }
 
@@ -58,7 +58,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
          val trace = call.attributes[traceKey]
          trace.response = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
-         trace.ps = trace.params.associateWith { call.parameters[it] }
+         trace.pathParameterExamples = trace.pathParameters.associateWith { call.parameters[it] }
          Tracer.addTrace(trace)
       }
    }

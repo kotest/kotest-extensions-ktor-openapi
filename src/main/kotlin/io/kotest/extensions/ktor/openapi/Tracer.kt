@@ -22,15 +22,16 @@ object Tracer {
 
 
 /**
- * @params the path parameter names.
- * @params ps path parameter values used
+ *
+ * @pathParameters the path parameter names.
+ * @pathParameterExamples ps path parameter values used
  */
 data class Trace(
    val method: HttpMethod,
-   var path: String?,
-   var params: List<String>,
+   var path: String,
+   var pathParameters: List<String>,
    var authentications: List<String>,
    var response: HttpStatusCode?,
    var description: String?,
-   var ps: Map<String, String?>,
+   var pathParameterExamples: Map<String, String?>,
 )
