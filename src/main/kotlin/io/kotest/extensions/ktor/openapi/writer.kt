@@ -17,7 +17,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme
 import java.nio.file.Files
 import java.nio.file.Path
 
-class OpenApiGenerator(config: OpenApiConfig) {
+class OpenApiWriter(config: OpenApiConfig) {
 
    private val openapi = OpenAPI().also { api ->
       api.info = Info()

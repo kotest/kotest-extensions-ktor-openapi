@@ -1,6 +1,5 @@
 package io.kotest.extensions.ktor.openapi
 
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -21,7 +20,7 @@ import java.nio.file.Paths
  * so we must add them here.
  */
 class OpenApiConfig(
-   var path: Path = Paths.get("./openapi.yml"),
+   var path: Path = Paths.get("./myopenapi.yml"),
    var authentication: Map<String, Authenticator> = emptyMap(),
 )
 
@@ -29,7 +28,6 @@ val OpenApiKey: AttributeKey<OpenApiConfig> = AttributeKey("OpenApiConfigAttribu
 
 val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApiConfig) {
 
-   val writer = OpenApiGenerator(pluginConfig)
    val traceKey = AttributeKey<Trace>("kotestOpenApiTrace")
 
 //   this.onCall { call ->
@@ -38,6 +36,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
 //      writer.write(this.pluginConfig.path)
 //   }
 
+   // this is called for each registeted route
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
       trace.path = call.route.path()
@@ -57,8 +56,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
          trace.response = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
          trace.ps = trace.params.associateWith { call.parameters[it] }
-         writer.addTrace(trace)
-         writer.write(this.pluginConfig.path)
+         Tracer.addTrace(trace)
       }
    }
 }
@@ -68,13 +66,3 @@ val DescriptionKey: AttributeKey<String> = AttributeKey("KotestOpenApiDescriptio
 fun PipelineContext<*, ApplicationCall>.description(desc: String) {
    call.attributes.put(DescriptionKey, desc)
 }
-
-data class Trace(
-   val method: HttpMethod,
-   var path: String?,
-   var params: List<String>,
-   var authentications: List<String>,
-   var response: HttpStatusCode?,
-   var description: String?,
-   var ps: Map<String, String?>,
-)
