@@ -21,7 +21,7 @@ import java.nio.file.Paths
  */
 class OpenApiConfig(
    var path: Path = Paths.get("./myopenapi.yml"),
-   var authentication: Map<String, Authenticator> = emptyMap(),
+   var authentications: Map<String, Authenticator> = emptyMap(),
 )
 
 val OpenApiKey: AttributeKey<OpenApiConfig> = AttributeKey("OpenApiConfigAttributeKey")

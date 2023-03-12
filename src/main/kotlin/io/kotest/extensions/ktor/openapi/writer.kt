@@ -25,7 +25,7 @@ class OpenApiWriter(config: OpenApiConfig) {
       api.info.title = "my-service"
       api.info.version = "1.0.0"
       api.components = Components()
-      config.authentication.forEach { authenticator ->
+      config.authentications.forEach { authenticator ->
          api.components.addSecuritySchemes(authenticator.key, SecurityScheme().also {
             when (val auth = authenticator.value) {
                is Authenticator.Header -> {

@@ -16,12 +16,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 
-//class OpenApiCollector(
-//   val path: Path,
-//   val authentications: Map<String, Authenticator>,
-//   val serviceName: String? = null,
-//)
-
 class OpenApiTest : FunSpec() {
 
 //   val collector = OpenApiCollector(
