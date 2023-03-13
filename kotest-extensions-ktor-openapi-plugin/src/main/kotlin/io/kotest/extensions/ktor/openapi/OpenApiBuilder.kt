@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.examples.Example
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
+import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
@@ -80,7 +81,10 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                   if (contentType != null) {
 
                      val mediaType = MediaType()
-                     mediaType.schema = tracesByContentType.firstNotNullOfOrNull { it.schema }?.toSchema()
+                     tracesByContentType.firstNotNullOfOrNull { it.schema }?.let {
+                        mediaType.schema = Schema<Any>()
+                        mediaType.schema.`$ref` = it.java.name
+                     }
 
                      // for each content type that is the same, they are added as multiple examples
                      // to the same MediaType in the response content
