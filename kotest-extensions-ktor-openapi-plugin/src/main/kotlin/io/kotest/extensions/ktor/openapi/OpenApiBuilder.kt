@@ -83,7 +83,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                      val mediaType = MediaType()
                      tracesByContentType.firstNotNullOfOrNull { it.schema }?.let {
                         mediaType.schema = Schema<Any>()
-                        mediaType.schema.`$ref` = it.java.name
+                        mediaType.schema.`$ref` = "#/components/schemas/" + it.java.name
                      }
 
                      // for each content type that is the same, they are added as multiple examples

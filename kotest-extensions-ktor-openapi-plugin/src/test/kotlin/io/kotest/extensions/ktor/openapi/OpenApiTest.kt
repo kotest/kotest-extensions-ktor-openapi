@@ -1,15 +1,19 @@
 package io.kotest.extensions.ktor.openapi
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.call
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.basic
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respond
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -29,6 +33,9 @@ class OpenApiTest : FunSpec() {
       test("should generate routes for all method types") {
          testApplication {
             install(KotestOpenApi)
+            install(ContentNegotiation) {
+               jackson()
+            }
             install(Authentication) {
                basic("auth2") {
                   this.realm = "myrealm"
@@ -41,7 +48,7 @@ class OpenApiTest : FunSpec() {
                route("/internal") {
                   get("/foo1") {
                      description("Returns the user identified by the foo param")
-                     call.respond(HttpStatusCode.OK, User("sammy", "chicago"))
+                     call.respond(User("sammy", "chicago"))
                   }
                   patch("/patchme") {
                      deprecated(true)
@@ -56,7 +63,7 @@ class OpenApiTest : FunSpec() {
                }
                post("/bar2") { call.respond(HttpStatusCode.OK, "some response body") }
             }
-            client.get("/internal/foo1")
+            client.get("/internal/foo1").bodyAsText() shouldBe """{"name":"sammy","location":"chicago"}"""
             client.patch("/internal/patchme")
             client.post("/bar2").status
             client.get("/users/154363")
