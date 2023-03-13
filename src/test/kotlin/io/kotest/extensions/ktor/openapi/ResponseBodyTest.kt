@@ -32,7 +32,7 @@ class ResponseBodyTest : FunSpec() {
          }
          t.getTraces().first().apply {
             contentType shouldBe ContentType.Text.Plain.withCharset(Charset.defaultCharset())
-            responseBody!!.array().decodeToString() shouldBe "I love lucy"
+            responseBody shouldBe "I love lucy"
          }
       }
 
@@ -57,7 +57,7 @@ class ResponseBodyTest : FunSpec() {
          }
          t.getTraces().first().apply {
             contentType shouldBe ContentType.Application.Json.withCharset(Charset.defaultCharset())
-            responseBody!!.array().decodeToString() shouldBe """{"a":"I love lucy","b":true,"c":1}"""
+            responseBody shouldBe """{"a":"I love lucy","b":true,"c":1}"""
          }
       }
    }

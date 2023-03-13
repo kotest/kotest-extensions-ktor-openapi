@@ -69,12 +69,14 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
          op.responses.addApiResponse(status.value.toString(), resp)
 
          trace.contentType?.let { contentType ->
+            trace.responseBody?.let { body ->
 
-            val mediaType = MediaType()
-            mediaType.example = """{"name":"foo"}"""
+               val mediaType = MediaType()
+               mediaType.example = body
 
-            resp.content = Content()
-            resp.content.addMediaType(contentType.toString(), mediaType)
+               resp.content = Content()
+               resp.content.addMediaType(contentType.toString(), mediaType)
+            }
          }
       }
 

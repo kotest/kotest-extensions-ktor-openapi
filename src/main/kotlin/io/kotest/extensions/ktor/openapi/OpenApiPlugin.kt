@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.OutputStreamContent
+import io.ktor.http.content.TextContent
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
@@ -79,9 +80,14 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
       val trace = call.attributes[traceKey]
       when (content) {
 
+         is TextContent -> {
+            trace.contentType = content.contentType
+            trace.responseBody = content.text
+         }
+
          is OutgoingContent.ByteArrayContent -> {
             trace.contentType = content.contentType
-            trace.responseBody = ByteBuffer.wrap(content.bytes())
+            trace.responseBody = "<bytes>"
          }
 
          is OutputStreamContent -> {
@@ -93,7 +99,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
             channel.copyTo(baos)
 
             trace.contentType = content.contentType
-            trace.responseBody = ByteBuffer.wrap(baos.toByteArray())
+            trace.responseBody = baos.toByteArray().decodeToString()
 
             transformBodyTo(
                ByteArrayContent(

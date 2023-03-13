@@ -5,6 +5,7 @@ import io.kotest.matchers.string.shouldInclude
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import java.nio.ByteBuffer
 import java.nio.file.Files
 import kotlin.io.path.readText
 
@@ -31,17 +32,19 @@ class OpenApiWriterTest : FunSpec({
       file.readText() shouldInclude "description: big bad service"
    }
 
-   test("writer should include content types") {
+   test("writer should include response body and content type") {
       val file = Files.createTempFile("openapi", "test")
-      val builder = OpenApiBuilder(OpenApiConfig(path = file, serviceDescription = "big bad service"))
+      val builder = OpenApiBuilder(OpenApiConfig(path = file))
       builder.addTrace(
-         Trace.default(HttpMethod.Get, "path mc facepath")
+         Trace.default(HttpMethod.Get, "parth path")
             .copy(
+               responseBody = "beam me up scotty",
                contentType = ContentType.Text.CSS,
                status = HttpStatusCode.MovedPermanently,
             )
       )
       OpenApiWriter(file).write(builder)
+      file.readText() shouldInclude "example: beam me up scotty"
       file.readText() shouldInclude "text/css"
    }
 })
