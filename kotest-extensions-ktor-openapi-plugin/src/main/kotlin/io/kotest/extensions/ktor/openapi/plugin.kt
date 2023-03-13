@@ -5,8 +5,6 @@ import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.OutputStreamContent
 import io.ktor.http.content.TextContent
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseBodyReadyForSend
@@ -14,11 +12,9 @@ import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.request.httpMethod
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
-import io.ktor.util.pipeline.PipelineContext
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.jvm.javaio.copyTo
 import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -71,6 +67,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
          val trace = call.attributes[traceKey]
          trace.status = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
+         trace.deprecated = call.attributes.getOrNull(DeprecatedKey) ?: false
          trace.pathParameterExamples = trace.pathParameters.associateWith { call.parameters[it] }
          this@createApplicationPlugin.pluginConfig.tracer.addTrace(trace)
       }
@@ -113,10 +110,4 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
          else -> println(content::class.java)
       }
    }
-}
-
-val DescriptionKey: AttributeKey<String> = AttributeKey("KotestOpenApiDescriptionKey")
-
-fun PipelineContext<*, ApplicationCall>.description(desc: String) {
-   call.attributes.put(DescriptionKey, desc)
 }

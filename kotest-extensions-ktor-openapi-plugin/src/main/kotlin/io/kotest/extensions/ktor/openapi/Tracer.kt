@@ -36,6 +36,7 @@ data class Trace(
    var contentType: ContentType? = null,
    var responseBody: String? = null,
    var description: String?,
+   var deprecated: Boolean = false,
    var pathParameterExamples: Map<String, String?>,
 ) {
    companion object {

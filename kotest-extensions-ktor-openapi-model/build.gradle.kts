@@ -1,7 +1,7 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+   id("kotest-publishing-conventions")
    kotlin("jvm") version "1.6.21"
 }
 
@@ -16,13 +16,8 @@ repositories {
    }
 }
 
-tasks.test {
-   useJUnitPlatform()
-   testLogging {
-      showExceptions = true
-      showStandardStreams = true
-      exceptionFormat = TestExceptionFormat.FULL
-   }
+dependencies {
+   api("io.ktor:ktor-server-core:2.2.4")
 }
 
 tasks.withType<KotlinCompile> {
