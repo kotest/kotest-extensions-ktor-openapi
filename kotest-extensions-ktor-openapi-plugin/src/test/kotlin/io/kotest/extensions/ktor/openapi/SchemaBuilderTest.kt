@@ -7,7 +7,16 @@ import io.swagger.v3.oas.models.media.Schema
 class SchemaBuilderTest : FunSpec() {
    init {
 
-      test("basic property types") {
+      test("primitives") {
+         String::class.toSchema() shouldBe SwaggerSchemas.string
+         Long::class.toSchema() shouldBe SwaggerSchemas.integer
+         Int::class.toSchema() shouldBe SwaggerSchemas.integer
+         Float::class.toSchema() shouldBe SwaggerSchemas.number
+         Double::class.toSchema() shouldBe SwaggerSchemas.number
+         Boolean::class.toSchema() shouldBe SwaggerSchemas.boolean
+      }
+
+      test("basic property types in data classes") {
          data class Foo(val a: String, val b: Boolean, val c: Int, val d: Long, val e: Float, val f: Double)
 
          val expected = Schema<Foo>()
@@ -18,6 +27,35 @@ class SchemaBuilderTest : FunSpec() {
          expected.addProperty("d", SwaggerSchemas.integer)
          expected.addProperty("e", SwaggerSchemas.number)
          expected.addProperty("f", SwaggerSchemas.number)
+         expected.name = Foo::class.java.name
+         Foo::class.toSchema() shouldBe expected
+      }
+
+      test("support primitive lists") {
+         data class Foo(val a: List<String>)
+
+         val listSchema = Schema<Any>()
+         listSchema.type = "array"
+         listSchema.items = SwaggerSchemas.string
+
+         val expected = Schema<Foo>()
+         expected.type = "object"
+         expected.addProperty("a", listSchema)
+         expected.name = Foo::class.java.name
+         Foo::class.toSchema() shouldBe expected
+      }
+
+      test("support complex lists") {
+         data class Bar(val b: Boolean)
+         data class Foo(val a: List<Bar>)
+
+         val listSchema = Schema<Any>()
+         listSchema.type = "array"
+         listSchema.items = Bar::class.toSchema()
+
+         val expected = Schema<Foo>()
+         expected.type = "object"
+         expected.addProperty("a", listSchema)
          expected.name = Foo::class.java.name
          Foo::class.toSchema() shouldBe expected
       }

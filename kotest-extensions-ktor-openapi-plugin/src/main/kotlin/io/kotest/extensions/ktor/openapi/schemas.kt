@@ -1,8 +1,9 @@
 package io.kotest.extensions.ktor.openapi
 
-import io.ktor.util.reflect.platformType
 import io.swagger.v3.oas.models.media.Schema
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.typeOf
 
@@ -14,42 +15,51 @@ object SwaggerSchemas {
    val obj = Schema<String>().apply { type = "object" }
 }
 
-fun KClass<*>.toSchema(): Schema<Any> {
-   require(isData) { "KClass must be data $this" }
-   val schema = Schema<Any>()
-   schema.name = this.java.name
-   schema.type = "object"
-   memberProperties.map { prop ->
-      println("returnType=" + prop.returnType)
-      println("platformType=" + prop.returnType.platformType)
-      val propSchema = when (prop.returnType) {
-         typeOf<String>() -> SwaggerSchemas.string
-         typeOf<Int>() -> SwaggerSchemas.integer
-         typeOf<Long>() -> SwaggerSchemas.integer
-         typeOf<Float>() -> SwaggerSchemas.number
-         typeOf<Double>() -> SwaggerSchemas.number
-         typeOf<Boolean>() -> SwaggerSchemas.boolean
-         typeOf<Map<String, String>>() -> {
-            val s = Schema<Any>()
-            s.type = "object"
-            s.additionalProperties = SwaggerSchemas.string
-            s
-         }
+fun KClass<*>.toSchema() = this.createType().toSchema()
 
-         else -> {
-            if (Map::class == prop.returnType.classifier) {
+fun KType.toSchema(): Schema<*>? {
+   return when (this) {
+      typeOf<String>() -> SwaggerSchemas.string
+      typeOf<Int>() -> SwaggerSchemas.integer
+      typeOf<Long>() -> SwaggerSchemas.integer
+      typeOf<Float>() -> SwaggerSchemas.number
+      typeOf<Double>() -> SwaggerSchemas.number
+      typeOf<Boolean>() -> SwaggerSchemas.boolean
+      else -> {
+         when (val classifier = this.classifier) {
+            is KClass<*> -> {
+               when (classifier) {
+                  List::class -> {
+                     val valueType = arguments[0].type?.classifier as KClass<*>
+                     val s = Schema<Any>()
+                     s.type = "array"
+                     s.items = valueType.toSchema()
+                     s
+                  }
 
-               val valueType = prop.returnType.arguments[1].type?.classifier as KClass<*>
+                  Map::class -> {
+                     val valueType = arguments[1].type?.classifier as KClass<*>
+                     val s = Schema<Any>()
+                     s.type = "object"
+                     s.additionalProperties = valueType.toSchema()
+                     s
+                  }
 
-               val s = Schema<Any>()
-               s.type = "object"
-               s.additionalProperties = valueType.toSchema()
-               s
+                  else -> {
+                     val schema = Schema<Any>()
+                     schema.name = classifier.java.name
+                     schema.type = "object"
+                     classifier.memberProperties.map { prop ->
+                        val propSchema = prop.returnType.toSchema()
+                        schema.addProperty(prop.name, propSchema)
+                     }
+                     schema
+                  }
+               }
+            }
 
-            } else null
+            else -> null
          }
       }
-      schema.addProperty(prop.name, propSchema)
    }
-   return schema
 }
