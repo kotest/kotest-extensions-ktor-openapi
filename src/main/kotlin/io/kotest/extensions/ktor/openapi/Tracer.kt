@@ -4,9 +4,9 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 
 /**
- * The [Tracer] is a global collection of all route [Trace]s.
+ * The tracer is used to collect individual route traces
  */
-object Tracer {
+class Tracer {
 
    private val traces = mutableListOf<Trace>()
 
@@ -17,9 +17,9 @@ object Tracer {
    fun getTraces(): List<Trace> {
       return traces.toList()
    }
-
 }
 
+val defaultTracer = Tracer()
 
 /**
  *

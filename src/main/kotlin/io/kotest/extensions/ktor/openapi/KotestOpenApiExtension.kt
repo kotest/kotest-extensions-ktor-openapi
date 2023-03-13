@@ -9,7 +9,7 @@ import io.kotest.core.listeners.AfterProjectListener
 class KotestOpenApiExtension(private val config: OpenApiConfig) : AfterProjectListener {
    override suspend fun afterProject() {
       val builder = OpenApiBuilder(config)
-      Tracer.getTraces().forEach { builder.addTrace(it) }
+      defaultTracer.getTraces().forEach { builder.addTrace(it) }
       OpenApiWriter(config.path).write(builder)
    }
 }

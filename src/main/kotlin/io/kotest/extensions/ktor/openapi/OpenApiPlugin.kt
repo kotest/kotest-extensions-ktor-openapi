@@ -29,7 +29,12 @@ class OpenApiConfig(
 
 val OpenApiKey: AttributeKey<OpenApiConfig> = AttributeKey("OpenApiConfigAttributeKey")
 
-val KotestOpenApi = createApplicationPlugin("OpenApi") {
+class OpenApiPluginConfig(
+   // can override the tracer here, used to test this plugin itself
+   internal var tracer: Tracer = defaultTracer
+)
+
+val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApiPluginConfig) {
 
    val traceKey = AttributeKey<Trace>("kotestOpenApiTrace")
 
@@ -59,7 +64,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi") {
          trace.response = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
          trace.pathParameterExamples = trace.pathParameters.associateWith { call.parameters[it] }
-         Tracer.addTrace(trace)
+         this@createApplicationPlugin.pluginConfig.tracer.addTrace(trace)
       }
    }
 }
