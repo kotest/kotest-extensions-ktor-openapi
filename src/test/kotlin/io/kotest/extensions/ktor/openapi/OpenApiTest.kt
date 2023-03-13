@@ -46,7 +46,7 @@ class OpenApiTest : FunSpec() {
                   get("/users/{foo}") { call.respond(HttpStatusCode.OK) }
                   delete("/with/param1/{foo}/even/{param2}") { call.respond(HttpStatusCode.OK) }
                }
-               post("/bar2") { call.respond(HttpStatusCode.OK) }
+               post("/bar2") { call.respond(HttpStatusCode.OK, "some response body") }
             }
             client.get("/internal/foo1")
             client.post("/bar2").status
