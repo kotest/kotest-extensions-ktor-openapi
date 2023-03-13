@@ -68,7 +68,6 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                // open api uses one ApiResponse per status code
                val resp = ApiResponse()
                resp.description = status.description
-               resp.content = Content()
                op.responses.addApiResponse(status.value.toString(), resp)
 
                tracesByStatus.groupBy { it.contentType }.forEach { (contentType, tracesByContentType) ->
@@ -85,6 +84,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                         )
                      }
 
+                     if (resp.content == null) resp.content = Content()
                      resp.content.addMediaType(contentType.toString(), mediaType)
                   }
                }
