@@ -1,15 +1,23 @@
 package io.kotest.extensions.ktor.openapi
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.ByteArrayContent
+import io.ktor.http.content.OutgoingContent
+import io.ktor.http.content.OutputStreamContent
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.hooks.CallSetup
+import io.ktor.server.application.hooks.ResponseBodyReadyForSend
 import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.request.httpMethod
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelineContext
+import io.ktor.utils.io.ByteChannel
+import io.ktor.utils.io.jvm.javaio.copyTo
+import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -36,6 +44,7 @@ class OpenApiPluginConfig(
 
 val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::OpenApiPluginConfig) {
 
+   // used to pass the trace object between hooks
    val traceKey = AttributeKey<Trace>("kotestOpenApiTrace")
 
 //   this.onCall { call ->
@@ -53,18 +62,49 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
    }
 
    on(CallSetup) { call ->
-      call.attributes.put(
-         traceKey, Trace(call.request.httpMethod, "", emptyList(), emptyList(), null, null, emptyMap())
-      )
+      call.attributes.put(traceKey, Trace.default(call.request.httpMethod, ""))
    }
 
    on(ResponseSent) { call ->
       if (call.response.status() != null && call.response.status() != HttpStatusCode.NotFound) {
          val trace = call.attributes[traceKey]
-         trace.response = call.response.status()
+         trace.status = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
          trace.pathParameterExamples = trace.pathParameters.associateWith { call.parameters[it] }
          this@createApplicationPlugin.pluginConfig.tracer.addTrace(trace)
+      }
+   }
+
+   on(ResponseBodyReadyForSend) { call, content ->
+      val trace = call.attributes[traceKey]
+      when (content) {
+
+         is OutgoingContent.ByteArrayContent -> {
+            trace.contentType = content.contentType
+            trace.responseBody = ByteBuffer.wrap(content.bytes())
+         }
+
+         is OutputStreamContent -> {
+
+            val channel = ByteChannel()
+            content.writeTo(channel)
+
+            val baos = ByteArrayOutputStream()
+            channel.copyTo(baos)
+
+            trace.contentType = content.contentType
+            trace.responseBody = ByteBuffer.wrap(baos.toByteArray())
+
+            transformBodyTo(
+               ByteArrayContent(
+                  bytes = baos.toByteArray(),
+                  contentType = content.contentType,
+                  status = content.status
+               )
+            )
+         }
+
+         else -> println(content::class.java)
       }
    }
 }

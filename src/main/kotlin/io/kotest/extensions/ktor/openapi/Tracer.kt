@@ -1,7 +1,9 @@
 package io.kotest.extensions.ktor.openapi
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import java.nio.ByteBuffer
 
 /**
  * The tracer is used to collect individual route traces
@@ -31,7 +33,24 @@ data class Trace(
    var path: String,
    var pathParameters: List<String>,
    var authentications: List<String>,
-   var response: HttpStatusCode?,
+   var status: HttpStatusCode?,
+   var contentType: ContentType? = null,
+   var responseBody: ByteBuffer? = null,
    var description: String?,
    var pathParameterExamples: Map<String, String?>,
-)
+) {
+   companion object {
+      fun default(method: HttpMethod, path: String) =
+         Trace(
+            method = method,
+            path = path,
+            pathParameters = emptyList(),
+            authentications = emptyList(),
+            status = null,
+            contentType = null,
+            responseBody = null,
+            description = null,
+            pathParameterExamples = emptyMap()
+         )
+   }
+}

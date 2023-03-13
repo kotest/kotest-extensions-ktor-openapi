@@ -61,13 +61,22 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
          HttpMethod.Put -> item.put = op
       }
 
-      val resp = ApiResponse()
-      resp.description = trace.response!!.description
-      resp.content = Content()
-      val mediaType = MediaType()
-      mediaType.example = """{"name":"foo"}"""
-      resp.content.addMediaType("application/json", mediaType)
-      op.responses.addApiResponse(trace.response!!.value.toString(), resp)
+
+      trace.status?.let { status ->
+
+         val resp = ApiResponse()
+         resp.description = status.description
+         op.responses.addApiResponse(status.value.toString(), resp)
+
+         trace.contentType?.let { contentType ->
+
+            val mediaType = MediaType()
+            mediaType.example = """{"name":"foo"}"""
+
+            resp.content = Content()
+            resp.content.addMediaType(contentType.toString(), mediaType)
+         }
+      }
 
       trace.authentications.forEach {
          val sec = SecurityRequirement()
