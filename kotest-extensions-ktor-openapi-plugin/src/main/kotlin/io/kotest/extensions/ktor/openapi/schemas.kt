@@ -1,5 +1,6 @@
 package io.kotest.extensions.ktor.openapi
 
+import io.ktor.util.reflect.platformType
 import io.swagger.v3.oas.models.media.Schema
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
@@ -14,11 +15,13 @@ object SwaggerSchemas {
 }
 
 fun KClass<*>.toSchema(): Schema<Any> {
-   require(isData)
+   require(isData) { "KClass must be data $this" }
    val schema = Schema<Any>()
    schema.name = this.java.name
    schema.type = "object"
    memberProperties.map { prop ->
+      println("returnType=" + prop.returnType)
+      println("platformType=" + prop.returnType.platformType)
       val propSchema = when (prop.returnType) {
          typeOf<String>() -> SwaggerSchemas.string
          typeOf<Int>() -> SwaggerSchemas.integer
@@ -26,7 +29,25 @@ fun KClass<*>.toSchema(): Schema<Any> {
          typeOf<Float>() -> SwaggerSchemas.number
          typeOf<Double>() -> SwaggerSchemas.number
          typeOf<Boolean>() -> SwaggerSchemas.boolean
-         else -> null
+         typeOf<Map<String, String>>() -> {
+            val s = Schema<Any>()
+            s.type = "object"
+            s.additionalProperties = SwaggerSchemas.string
+            s
+         }
+
+         else -> {
+            if (Map::class == prop.returnType.classifier) {
+
+               val valueType = prop.returnType.arguments[1].type?.classifier as KClass<*>
+
+               val s = Schema<Any>()
+               s.type = "object"
+               s.additionalProperties = valueType.toSchema()
+               s
+
+            } else null
+         }
       }
       schema.addProperty(prop.name, propSchema)
    }

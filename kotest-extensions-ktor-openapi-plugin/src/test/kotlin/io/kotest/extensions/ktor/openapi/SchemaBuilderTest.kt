@@ -21,5 +21,34 @@ class SchemaBuilderTest : FunSpec() {
          expected.name = Foo::class.java.name
          Foo::class.toSchema() shouldBe expected
       }
+
+      test("support primitive maps") {
+         data class Foo(val a: Map<String, String>)
+
+         val mapSchema = Schema<Any>()
+         mapSchema.type = "object"
+         mapSchema.additionalProperties = SwaggerSchemas.string
+
+         val expected = Schema<Foo>()
+         expected.type = "object"
+         expected.addProperty("a", mapSchema)
+         expected.name = Foo::class.java.name
+         Foo::class.toSchema() shouldBe expected
+      }
+
+      test("support complex maps") {
+         data class Bar(val b: Boolean)
+         data class Foo(val a: Map<String, Bar>)
+
+         val mapSchema = Schema<Any>()
+         mapSchema.type = "object"
+         mapSchema.additionalProperties = Bar::class.toSchema()
+
+         val expected = Schema<Foo>()
+         expected.type = "object"
+         expected.addProperty("a", mapSchema)
+         expected.name = Foo::class.java.name
+         Foo::class.toSchema() shouldBe expected
+      }
    }
 }
