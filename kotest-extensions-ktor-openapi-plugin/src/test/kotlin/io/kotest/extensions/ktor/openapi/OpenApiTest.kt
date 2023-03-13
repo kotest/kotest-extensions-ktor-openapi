@@ -41,6 +41,7 @@ class OpenApiTest : FunSpec() {
                route("/internal") {
                   get("/foo1") {
                      description("Returns the user identified by the foo param")
+                     schema<MyDataClass>()
                      call.respond(HttpStatusCode.OK)
                   }
                   patch("/patchme") {
@@ -65,3 +66,9 @@ class OpenApiTest : FunSpec() {
       }
    }
 }
+
+data class MyDataClass(
+   val a: String,
+   val b: Int,
+   val c: Double,
+)

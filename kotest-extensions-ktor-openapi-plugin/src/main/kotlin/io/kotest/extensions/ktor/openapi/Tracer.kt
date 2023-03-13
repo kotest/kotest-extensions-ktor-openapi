@@ -3,6 +3,7 @@ package io.kotest.extensions.ktor.openapi
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import kotlin.reflect.KClass
 
 /**
  * The tracer is used to collect individual route traces.
@@ -37,6 +38,7 @@ data class Trace(
    var responseBody: String? = null,
    var description: String?,
    var deprecated: Boolean = false,
+   var schema: KClass<*>? = null,
    var pathParameterExamples: Map<String, String?>,
 ) {
    companion object {

@@ -44,6 +44,11 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
       val item = PathItem()
       openapi.path(path, item)
 
+      // add all schemas at the top level
+      traces.mapNotNull { it.schema }.forEach { schema ->
+         openapi.components.addSchemas(schema.java.name, schema.toSchema())
+      }
+
       // each http method is an operation
       traces.groupBy { it.method }.forEach { (method, tracesByMethod) ->
 
@@ -75,6 +80,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                   if (contentType != null) {
 
                      val mediaType = MediaType()
+                     mediaType.schema = tracesByContentType.firstNotNullOfOrNull { it.schema }?.toSchema()
 
                      // for each content type that is the same, they are added as multiple examples
                      // to the same MediaType in the response content

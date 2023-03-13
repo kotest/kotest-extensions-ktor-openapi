@@ -68,6 +68,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
          trace.status = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
          trace.deprecated = call.attributes.getOrNull(DeprecatedKey) ?: false
+         trace.schema = call.attributes.getOrNull(SchemaKey)
          trace.pathParameterExamples = trace.pathParameters.associateWith { call.parameters[it] }
          this@createApplicationPlugin.pluginConfig.tracer.addTrace(trace)
       }
