@@ -32,8 +32,6 @@ class OpenApiConfig(
    var authentications: Map<String, Authenticator> = emptyMap(),
 )
 
-val OpenApiKey: AttributeKey<OpenApiConfig> = AttributeKey("OpenApiConfigAttributeKey")
-
 class OpenApiPluginConfig(
    // can override the tracer here, used to test this plugin itself
    internal var tracer: Tracer = defaultTracer
@@ -44,13 +42,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
    // used to pass the trace object between hooks
    val traceKey = AttributeKey<Trace>("kotestOpenApiTrace")
 
-//   this.onCall { call ->
-//      println(call.isHandled)
-//      writer.generate(call.request.uri, call.request.httpMethod)
-//      writer.write(this.pluginConfig.path)
-//   }
-
-   // this is called for each registeted route
+   // this is called for each registered route
    environment!!.monitor.subscribe(Routing.RoutingCallStarted) { call ->
       val trace = call.attributes[traceKey]
       trace.path = call.route.path()
@@ -68,9 +60,16 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
          trace.status = call.response.status()
          trace.description = call.attributes.getOrNull(DescriptionKey)
          trace.deprecated = call.attributes.getOrNull(DeprecatedKey) ?: false
-         trace.schema = call.attributes.getOrNull(SchemaKey)
+//         trace.schema = call.attributes.getOrNull(SchemaKey)
          trace.pathParameterExamples = trace.pathParameters.associateWith { call.parameters[it] }
          this@createApplicationPlugin.pluginConfig.tracer.addTrace(trace)
+      }
+   }
+
+   onCallRespond { call, body ->
+      if (body::class.isData) {
+         val trace = call.attributes[traceKey]
+         trace.schema = body::class
       }
    }
 
