@@ -2,6 +2,7 @@ package io.kotest.extensions.ktor.openapi
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.string.shouldInclude
+import io.kotest.matchers.string.shouldNotInclude
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -113,5 +114,57 @@ class OpenApiWriterTest : FunSpec({
       OpenApiWriter(file).write(builder)
       file.readText() shouldInclude "beam me up scotty"
       file.readText() shouldInclude "text/css"
+   }
+
+   test("builder should not set example key if only one response") {
+      val file = Files.createTempFile("openapi", "test")
+      val builder = OpenApiBuilder(OpenApiConfig(path = file))
+      builder.addTraces(
+         "parth path",
+         listOf(
+            Trace.default(HttpMethod.Get, "parth path")
+               .copy(
+                  responseBody = "beam me up scotty",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+               )
+         )
+      )
+      OpenApiWriter(file).write(builder)
+      file.readText() shouldInclude "beam me up scotty"
+      file.readText() shouldNotInclude "Example 1"
+   }
+
+   test("builder should not include identical response bodies") {
+      val file = Files.createTempFile("openapi", "test")
+      val builder = OpenApiBuilder(OpenApiConfig(path = file))
+      builder.addTraces(
+         "parth path",
+         listOf(
+            Trace.default(HttpMethod.Get, "parth path")
+               .copy(
+                  responseBody = "beam me up scotty",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+               ),
+            Trace.default(HttpMethod.Get, "parth path")
+               .copy(
+                  responseBody = "beam me up jimmy",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+               ),
+            Trace.default(HttpMethod.Get, "parth path")
+               .copy(
+                  responseBody = "beam me up scotty",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+               )
+         )
+      )
+      OpenApiWriter(file).write(builder)
+      file.readText() shouldInclude "beam me up scotty"
+      file.readText() shouldInclude "Example 1"
+      file.readText() shouldInclude "Example 2"
+      file.readText() shouldNotInclude "Example 3"
    }
 })

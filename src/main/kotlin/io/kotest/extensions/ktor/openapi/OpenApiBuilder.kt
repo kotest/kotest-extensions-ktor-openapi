@@ -77,11 +77,16 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
 
                      // for each content type that is the same, they are added as multiple examples
                      // to the same MediaType in the response content
-                     tracesByContentType.withIndex().forEach { (index, value) ->
-                        mediaType.addExamples(
-                           "Example ${index + 1}",
-                           Example().value(value.responseBody)
-                        )
+                     val bodies = tracesByContentType.mapNotNull { it.responseBody }.distinct()
+                     if (bodies.size == 1) {
+                        mediaType.example = bodies.first()
+                     } else if (bodies.size > 1) {
+                        bodies.withIndex().forEach { (index, value) ->
+                           mediaType.addExamples(
+                              "Example ${index + 1}",
+                              Example().value(value)
+                           )
+                        }
                      }
 
                      if (resp.content == null) resp.content = Content()
