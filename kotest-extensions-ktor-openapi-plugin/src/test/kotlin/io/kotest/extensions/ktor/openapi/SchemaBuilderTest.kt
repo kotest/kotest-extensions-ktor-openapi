@@ -75,7 +75,7 @@ class SchemaBuilderTest : FunSpec() {
       }
 
       test("support complex maps") {
-         data class Bar(val b: Boolean)
+         data class Bar(val b: Boolean, val c: String)
          data class Foo(val a: Map<String, Bar>)
 
          val mapSchema = Schema<Any>()

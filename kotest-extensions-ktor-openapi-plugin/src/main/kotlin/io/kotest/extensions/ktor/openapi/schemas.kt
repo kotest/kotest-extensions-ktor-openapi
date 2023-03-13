@@ -29,6 +29,7 @@ fun KType.toSchema(): Schema<*>? {
          when (val classifier = this.classifier) {
             is KClass<*> -> {
                when (classifier) {
+
                   List::class -> {
                      val valueType = arguments[0].type?.classifier as KClass<*>
                      val s = Schema<Any>()
@@ -45,15 +46,26 @@ fun KType.toSchema(): Schema<*>? {
                      s
                   }
 
+                  String::class -> SwaggerSchemas.string
+                  Boolean::class -> SwaggerSchemas.boolean
+                  Integer::class -> SwaggerSchemas.integer
+                  Long::class -> SwaggerSchemas.integer
+                  Float::class -> SwaggerSchemas.number
+                  Double::class -> SwaggerSchemas.number
+
                   else -> {
-                     val schema = Schema<Any>()
-                     schema.name = classifier.java.name
-                     schema.type = "object"
-                     classifier.memberProperties.map { prop ->
-                        val propSchema = prop.returnType.toSchema()
-                        schema.addProperty(prop.name, propSchema)
+                     if (classifier.isData) {
+                        val schema = Schema<Any>()
+                        schema.name = classifier.java.name
+                        schema.type = "object"
+                        classifier.memberProperties.map { prop ->
+                           val propSchema = prop.returnType.toSchema()
+                           schema.addProperty(prop.name, propSchema)
+                        }
+                        schema
+                     } else {
+                       null
                      }
-                     schema
                   }
                }
             }
