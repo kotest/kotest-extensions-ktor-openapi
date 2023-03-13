@@ -5,7 +5,6 @@ import io.kotest.matchers.string.shouldInclude
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import java.nio.ByteBuffer
 import java.nio.file.Files
 import kotlin.io.path.readText
 
@@ -32,19 +31,87 @@ class OpenApiWriterTest : FunSpec({
       file.readText() shouldInclude "description: big bad service"
    }
 
-   test("writer should include response body and content type") {
+   test("should support same endpoint with different methods") {
       val file = Files.createTempFile("openapi", "test")
-      val builder = OpenApiBuilder(OpenApiConfig(path = file))
-      builder.addTrace(
-         Trace.default(HttpMethod.Get, "parth path")
-            .copy(
-               responseBody = "beam me up scotty",
-               contentType = ContentType.Text.CSS,
-               status = HttpStatusCode.MovedPermanently,
-            )
+      val builder = OpenApiBuilder(OpenApiConfig(path = file, serviceDescription = "big bad service"))
+      builder.addTraces(
+         "assbbb",
+         listOf(
+            Trace.default(HttpMethod.Get, "assbbb"),
+            Trace.default(HttpMethod.Patch, "assbbb"),
+         )
       )
       OpenApiWriter(file).write(builder)
-      file.readText() shouldInclude "example: beam me up scotty"
+      file.readText() shouldInclude "get"
+      file.readText() shouldInclude "patch"
+   }
+
+   test("builder should support multiple path parameter examples") {
+      val file = Files.createTempFile("openapi", "test")
+      val builder = OpenApiBuilder(OpenApiConfig(path = file, serviceDescription = "big bad service"))
+      builder.addTraces(
+         "ghfgh",
+         listOf(
+            Trace.default(HttpMethod.Get, "ghfgh")
+               .copy(pathParameters = listOf("a"), pathParameterExamples = mapOf("a" to "foo-param")),
+            Trace.default(HttpMethod.Get, "ghfgh")
+               .copy(pathParameters = listOf("a"), pathParameterExamples = mapOf("a" to "bar-param"))
+         ),
+      )
+      OpenApiWriter(file).write(builder)
+      file.readText().apply {
+         shouldInclude("Example 1")
+         shouldInclude("foo-param")
+         shouldInclude("Example 2")
+         shouldInclude("bar-param")
+      }
+   }
+
+   test("builder should support multiple response bodies for a given content type") {
+      val file = Files.createTempFile("openapi", "test")
+      val builder = OpenApiBuilder(OpenApiConfig(path = file, serviceDescription = "big bad service"))
+      builder.addTraces(
+         "rtertret",
+         listOf(
+            Trace.default(HttpMethod.Get, "rtertret")
+               .copy(
+                  responseBody = "beam me up jim",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+               ),
+            Trace.default(HttpMethod.Get, "rtertret")
+               .copy(
+                  responseBody = "beam me up scotty",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+               )
+         )
+      )
+      OpenApiWriter(file).write(builder)
+      file.readText().apply {
+         shouldInclude("Example 1")
+         shouldInclude("beam me up jim")
+         shouldInclude("Example 2")
+         shouldInclude("beam me up scotty")
+      }
+   }
+
+   test("builder should include response body and content type") {
+      val file = Files.createTempFile("openapi", "test")
+      val builder = OpenApiBuilder(OpenApiConfig(path = file))
+      builder.addTraces(
+         "parth path",
+         listOf(
+            Trace.default(HttpMethod.Get, "parth path")
+               .copy(
+                  responseBody = "beam me up scotty",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+               )
+         )
+      )
+      OpenApiWriter(file).write(builder)
+      file.readText() shouldInclude "beam me up scotty"
       file.readText() shouldInclude "text/css"
    }
 })

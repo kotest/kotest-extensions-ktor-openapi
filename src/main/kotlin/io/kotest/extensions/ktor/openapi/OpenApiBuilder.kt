@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
+import io.swagger.v3.oas.models.examples.Example
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
@@ -35,57 +36,88 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
       }
    }
 
-   fun addTrace(trace: Trace) {
+   /**
+    * Adds traces grouped by an endpoint path
+    */
+   fun addTraces(path: String, traces: List<Trace>) {
 
       val item = PathItem()
-      val op = Operation()
+      openapi.path(path, item)
 
-      op.description = trace.description
-      op.responses = ApiResponses()
+      // each http method is an operation
+      traces.groupBy { it.method }.forEach { (method, tracesByMethod) ->
 
-      trace.pathParameters.forEach {
-         val p = Parameter()
-         p.name = it
-         p.`in` = "path"
-         p.example = trace.pathParameterExamples[it]
-         op.addParametersItem(p)
-      }
+         val op = Operation()
+         op.description = tracesByMethod.firstNotNullOfOrNull { it.description }
+         op.responses = ApiResponses()
+         op.parameters = mutableListOf()
 
-      when (trace.method) {
-         HttpMethod.Delete -> item.delete = op
-         HttpMethod.Get -> item.get = op
-         HttpMethod.Head -> item.head = op
-         HttpMethod.Options -> item.options = op
-         HttpMethod.Patch -> item.patch = op
-         HttpMethod.Post -> item.post = op
-         HttpMethod.Put -> item.put = op
-      }
+         when (method) {
+            HttpMethod.Delete -> item.delete = op
+            HttpMethod.Get -> item.get = op
+            HttpMethod.Head -> item.head = op
+            HttpMethod.Options -> item.options = op
+            HttpMethod.Patch -> item.patch = op
+            HttpMethod.Post -> item.post = op
+            HttpMethod.Put -> item.put = op
+         }
 
+         tracesByMethod.groupBy { it.status }.forEach { (status, tracesByStatus) ->
+            if (status != null) {
 
-      trace.status?.let { status ->
-
-         val resp = ApiResponse()
-         resp.description = status.description
-         op.responses.addApiResponse(status.value.toString(), resp)
-
-         trace.contentType?.let { contentType ->
-            trace.responseBody?.let { body ->
-
-               val mediaType = MediaType()
-               mediaType.example = body
-
+               // open api uses one ApiResponse per status code
+               val resp = ApiResponse()
+               resp.description = status.description
                resp.content = Content()
-               resp.content.addMediaType(contentType.toString(), mediaType)
+               op.responses.addApiResponse(status.value.toString(), resp)
+
+               tracesByStatus.groupBy { it.contentType }.forEach { (contentType, tracesByContentType) ->
+                  if (contentType != null) {
+
+                     val mediaType = MediaType()
+
+                     // for each content type that is the same, they are added as multiple examples
+                     // to the same MediaType in the response content
+                     tracesByContentType.withIndex().forEach { (index, value) ->
+                        mediaType.addExamples(
+                           "Example ${index + 1}",
+                           Example().value(value.responseBody)
+                        )
+                     }
+
+                     resp.content.addMediaType(contentType.toString(), mediaType)
+                  }
+               }
+            }
+         }
+
+         // path parameters must be consistent across all traces since the endpoint is the same,
+         // so we can add just once
+         tracesByMethod.first().pathParameters.forEach {
+            op.addParametersItem(
+               Parameter()
+                  .name(it)
+                  .`in`("path")
+            )
+         }
+
+         tracesByMethod.forEach { trace ->
+
+            trace.pathParameterExamples.forEach { (param, example) ->
+               val p = op.parameters.find { it.name == param && it.`in` == "path" }
+               if (p != null) {
+                  val examples = p.examples ?: emptyMap()
+                  val key = "Example " + (examples.size + 1)
+                  p.addExample(key, Example().value(example))
+               }
+            }
+
+            trace.authentications.forEach {
+               val sec = SecurityRequirement()
+               sec.addList(it)
+               op.addSecurityItem(sec)
             }
          }
       }
-
-      trace.authentications.forEach {
-         val sec = SecurityRequirement()
-         sec.addList(it)
-         op.addSecurityItem(sec)
-      }
-
-      openapi.path(trace.path, item)
    }
 }

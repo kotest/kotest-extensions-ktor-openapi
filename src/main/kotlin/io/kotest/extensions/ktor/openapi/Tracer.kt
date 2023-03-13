@@ -5,7 +5,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 
 /**
- * The tracer is used to collect individual route traces
+ * The tracer is used to collect individual route traces.
  */
 class Tracer {
 

@@ -14,6 +14,7 @@ import io.ktor.server.testing.testApplication
 
 class RepeatedPathTest : FunSpec() {
    init {
+
       test("should support same path with different methods") {
          val t = Tracer()
          testApplication {
