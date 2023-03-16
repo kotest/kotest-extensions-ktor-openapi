@@ -24,7 +24,7 @@ dependencies {
    implementation("io.swagger.parser.v3:swagger-parser:2.1.12")
    implementation("io.kotest:kotest-framework-api:5.5.4")
    testImplementation("io.ktor:ktor-client-apache:2.2.4")
-   testImplementation("io.kotest:kotest-runner-junit5:5.5.4")
+   testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
    testImplementation("io.kotest:kotest-assertions-core:5.5.4")
    testImplementation("io.ktor:ktor-server-test-host:2.2.4")
    testImplementation("io.ktor:ktor-serialization-jackson:2.2.3")
