@@ -31,6 +31,25 @@ class SchemaBuilderTest : FunSpec() {
          Foo::class.toSchema() shouldBe expected
       }
 
+      test("support nested types") {
+         data class Bar(val c: String, val d: Boolean)
+         data class Foo(val a: String, val b: Bar)
+
+         val bar = Schema<Foo>()
+         bar.type = "object"
+         bar.addProperty("c", SwaggerSchemas.string)
+         bar.addProperty("d", SwaggerSchemas.boolean)
+         bar.name = Bar::class.java.name
+
+         val foo = Schema<Foo>()
+         foo.type = "object"
+         foo.addProperty("a", SwaggerSchemas.string)
+         foo.addProperty("b", bar)
+         foo.name = Bar::class.java.name
+
+         Foo::class.toSchema() shouldBe foo
+      }
+
       test("support primitive lists") {
          data class Foo(val a: List<String>)
 
