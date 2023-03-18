@@ -25,15 +25,22 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
       api.info.version = config.serviceVersion ?: "0.0.0"
       api.components = Components()
       config.authentications.forEach { authenticator ->
-         api.components.addSecuritySchemes(authenticator.key, SecurityScheme().also {
-            when (val auth = authenticator.value) {
-               is Authenticator.Header -> {
-                  it.type = SecurityScheme.Type.APIKEY
-                  it.`in` = SecurityScheme.In.HEADER
-                  it.name = auth.name
-               }
+         val scheme = SecurityScheme()
+         when (val auth = authenticator.value) {
+
+            is AuthenticationMethod.Header -> {
+               scheme.type = SecurityScheme.Type.APIKEY
+               scheme.`in` = SecurityScheme.In.HEADER
+               scheme.name = auth.name
             }
-         })
+
+            is AuthenticationMethod.Bearer -> {
+               scheme.type = SecurityScheme.Type.HTTP
+               scheme.scheme = "bearer"
+               scheme.name = auth.name
+            }
+         }
+         api.components.addSecuritySchemes(authenticator.key, scheme)
       }
    }
 

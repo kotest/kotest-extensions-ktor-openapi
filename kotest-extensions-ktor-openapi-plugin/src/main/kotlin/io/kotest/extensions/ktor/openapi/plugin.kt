@@ -30,7 +30,7 @@ class OpenApiConfig(
    var serviceTitle: String? = null,
    var serviceVersion: String? = null,
    var serviceDescription: String? = null,
-   var authentications: Map<String, Authenticator> = emptyMap(),
+   var authentications: Map<String, AuthenticationMethod> = emptyMap(),
 )
 
 class OpenApiPluginConfig(
