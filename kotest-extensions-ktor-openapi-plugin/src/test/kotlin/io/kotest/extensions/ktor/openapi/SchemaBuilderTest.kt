@@ -45,9 +45,41 @@ class SchemaBuilderTest : FunSpec() {
          foo.type = "object"
          foo.addProperty("a", SwaggerSchemas.string)
          foo.addProperty("b", bar)
-         foo.name = Bar::class.java.name
+         foo.name = Foo::class.java.name
 
          Foo::class.toSchema() shouldBe foo
+      }
+
+      test("support sealed interfaces") {
+         data class Foo(val a: String, val b: Wibble)
+
+         val bar = Schema<Wibble.Bar>()
+         bar.type = "object"
+         bar.addProperty("a", SwaggerSchemas.string)
+         bar.addProperty("b", SwaggerSchemas.boolean)
+         bar.name = Wibble.Bar::class.java.name
+
+         val baz = Schema<Wibble.Baz>()
+         baz.type = "object"
+         baz.addProperty("c", SwaggerSchemas.number)
+         baz.addProperty("d", SwaggerSchemas.number)
+         baz.name = Wibble.Baz::class.java.name
+
+         val wibble = Schema<Wibble>()
+         wibble.type = "object"
+         wibble.anyOf(listOf(bar, baz))
+         wibble.name = Wibble::class.java.name
+
+         val foo = Schema<Foo>()
+         foo.type = "object"
+         foo.addProperty("a", SwaggerSchemas.string)
+         foo.addProperty("b", wibble)
+         foo.name = Foo::class.java.name
+
+         val expected = Foo::class.toSchema()!!.properties["b"]!!
+         expected.anyOf.first() shouldBe bar
+         expected.anyOf.last() shouldBe baz
+         expected shouldBe wibble
       }
 
       test("support primitive lists") {
@@ -108,4 +140,9 @@ class SchemaBuilderTest : FunSpec() {
          Foo::class.toSchema() shouldBe expected
       }
    }
+}
+
+sealed interface Wibble {
+   data class Bar(val a: String, val b: Boolean) : Wibble
+   data class Baz(val c: Double, val d: Float) : Wibble
 }

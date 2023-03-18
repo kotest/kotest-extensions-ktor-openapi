@@ -63,6 +63,13 @@ fun KType.toSchema(): Schema<*>? {
                            schema.addProperty(prop.name, propSchema)
                         }
                         schema
+                     } else if (classifier.isSealed) {
+                        val schemas = classifier.sealedSubclasses.map { it.toSchema() }
+                        val schema = Schema<Any>()
+                        schema.name = classifier.java.name
+                        schema.type = "object"
+                        schema.anyOf(schemas)
+                        schema
                      } else {
                        null
                      }
