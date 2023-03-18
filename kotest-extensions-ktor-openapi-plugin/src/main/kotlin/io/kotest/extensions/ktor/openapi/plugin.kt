@@ -9,6 +9,7 @@ import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseBodyReadyForSend
 import io.ktor.server.application.hooks.ResponseSent
+import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.request.httpMethod
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
@@ -47,7 +48,11 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
       val trace = call.attributes[traceKey]
       trace.path = call.route.path()
       trace.pathParameters = call.route.pathParameters()
-      trace.authentications = call.route.authentication()
+      val a = call.route.authentication()
+      trace.authentication = call.route.authentication()
+   }
+
+   on(AuthenticationChecked) {
    }
 
    on(CallSetup) { call ->

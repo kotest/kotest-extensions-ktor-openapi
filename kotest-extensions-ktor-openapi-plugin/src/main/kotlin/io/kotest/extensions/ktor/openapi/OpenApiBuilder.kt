@@ -127,12 +127,12 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                   p.addExample(key, Example().value(example))
                }
             }
+         }
 
-            trace.authentications.forEach {
-               val sec = SecurityRequirement()
-               sec.addList(it)
-               op.addSecurityItem(sec)
-            }
+         tracesByMethod.flatMap { it.authentication }.distinct().forEach {
+            val sec = SecurityRequirement()
+            sec.addList(it)
+            op.addSecurityItem(sec)
          }
       }
    }

@@ -27,12 +27,13 @@ val defaultTracer = Tracer()
  *
  * @pathParameters the path parameter names.
  * @pathParameterExamples ps path parameter values used
+ * @authentication authentication providers detected on this route
  */
 data class Trace(
    val method: HttpMethod,
    var path: String,
    var pathParameters: List<String>,
-   var authentications: List<String>,
+   var authentication: List<String>,
    var status: HttpStatusCode?,
    var contentType: ContentType? = null,
    var responseBody: String? = null,
@@ -47,7 +48,7 @@ data class Trace(
             method = method,
             path = path,
             pathParameters = emptyList(),
-            authentications = emptyList(),
+            authentication = emptyList(),
             status = null,
             contentType = null,
             responseBody = null,

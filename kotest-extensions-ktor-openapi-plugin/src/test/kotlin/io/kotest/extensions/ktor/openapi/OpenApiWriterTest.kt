@@ -167,4 +167,33 @@ class OpenApiWriterTest : FunSpec({
       file.readText() shouldInclude "Example 2"
       file.readText() shouldNotInclude "Example 3"
    }
+
+   test("builder should distinct authentications by endpoint") {
+      val file = Files.createTempFile("openapi", "test")
+      val builder = OpenApiBuilder(OpenApiConfig(path = file))
+      builder.addTraces(
+         "party/path",
+         listOf(
+            Trace.default(HttpMethod.Get, "party/path")
+               .copy(
+                  responseBody = "beam me up scotty",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+                  authentication = listOf("foo", "bar")
+               ),
+            Trace.default(HttpMethod.Get, "party/path")
+               .copy(
+                  responseBody = "beam me up jimmy",
+                  contentType = ContentType.Text.CSS,
+                  status = HttpStatusCode.MovedPermanently,
+                  authentication = listOf("foo", "bar")
+               ),
+         )
+      )
+      OpenApiWriter(file).write(builder)
+      file.readText() shouldInclude """security:
+      - foo: []
+      - bar: []
+components"""
+   }
 })

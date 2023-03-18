@@ -16,4 +16,5 @@ project/plugins/project/
 credentials.sbt
 /.idea/
 
+openapi.yml
 myopenapi.yml
