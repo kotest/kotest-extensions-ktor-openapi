@@ -38,8 +38,8 @@ class OpenApiWriterTest : FunSpec({
       builder.addTraces(
          "assbbb",
          listOf(
-            Trace.default(HttpMethod.Get, "assbbb"),
-            Trace.default(HttpMethod.Patch, "assbbb"),
+            Trace.default("", HttpMethod.Get, "assbbb"),
+            Trace.default("", HttpMethod.Patch, "assbbb"),
          )
       )
       OpenApiWriter(file).write(builder)
@@ -53,9 +53,9 @@ class OpenApiWriterTest : FunSpec({
       builder.addTraces(
          "ghfgh",
          listOf(
-            Trace.default(HttpMethod.Get, "ghfgh")
+            Trace.default("", HttpMethod.Get, "ghfgh")
                .copy(pathParameters = listOf("a"), pathParameterExamples = mapOf("a" to "foo-param")),
-            Trace.default(HttpMethod.Get, "ghfgh")
+            Trace.default("", HttpMethod.Get, "ghfgh")
                .copy(pathParameters = listOf("a"), pathParameterExamples = mapOf("a" to "bar-param"))
          ),
       )
@@ -74,13 +74,13 @@ class OpenApiWriterTest : FunSpec({
       builder.addTraces(
          "rtertret",
          listOf(
-            Trace.default(HttpMethod.Get, "rtertret")
+            Trace.default("", HttpMethod.Get, "rtertret")
                .copy(
                   responseBody = "beam me up jim",
                   contentType = ContentType.Text.CSS,
                   status = HttpStatusCode.MovedPermanently,
                ),
-            Trace.default(HttpMethod.Get, "rtertret")
+            Trace.default("", HttpMethod.Get, "rtertret")
                .copy(
                   responseBody = "beam me up scotty",
                   contentType = ContentType.Text.CSS,
@@ -103,7 +103,7 @@ class OpenApiWriterTest : FunSpec({
       builder.addTraces(
          "parth path",
          listOf(
-            Trace.default(HttpMethod.Get, "parth path")
+            Trace.default("", HttpMethod.Get, "parth path")
                .copy(
                   responseBody = "beam me up scotty",
                   contentType = ContentType.Text.CSS,
@@ -122,7 +122,7 @@ class OpenApiWriterTest : FunSpec({
       builder.addTraces(
          "parth path",
          listOf(
-            Trace.default(HttpMethod.Get, "parth path")
+            Trace.default("", HttpMethod.Get, "parth path")
                .copy(
                   responseBody = "beam me up scotty",
                   contentType = ContentType.Text.CSS,
@@ -141,19 +141,19 @@ class OpenApiWriterTest : FunSpec({
       builder.addTraces(
          "parth path",
          listOf(
-            Trace.default(HttpMethod.Get, "parth path")
+            Trace.default("", HttpMethod.Get, "parth path")
                .copy(
                   responseBody = "beam me up scotty",
                   contentType = ContentType.Text.CSS,
                   status = HttpStatusCode.MovedPermanently,
                ),
-            Trace.default(HttpMethod.Get, "parth path")
+            Trace.default("", HttpMethod.Get, "parth path")
                .copy(
                   responseBody = "beam me up jimmy",
                   contentType = ContentType.Text.CSS,
                   status = HttpStatusCode.MovedPermanently,
                ),
-            Trace.default(HttpMethod.Get, "parth path")
+            Trace.default("", HttpMethod.Get, "parth path")
                .copy(
                   responseBody = "beam me up scotty",
                   contentType = ContentType.Text.CSS,
@@ -174,14 +174,14 @@ class OpenApiWriterTest : FunSpec({
       builder.addTraces(
          "party/path",
          listOf(
-            Trace.default(HttpMethod.Get, "party/path")
+            Trace.default("", HttpMethod.Get, "party/path")
                .copy(
                   responseBody = "beam me up scotty",
                   contentType = ContentType.Text.CSS,
                   status = HttpStatusCode.MovedPermanently,
                   authentication = listOf("foo", "bar")
                ),
-            Trace.default(HttpMethod.Get, "party/path")
+            Trace.default("", HttpMethod.Get, "party/path")
                .copy(
                   responseBody = "beam me up jimmy",
                   contentType = ContentType.Text.CSS,

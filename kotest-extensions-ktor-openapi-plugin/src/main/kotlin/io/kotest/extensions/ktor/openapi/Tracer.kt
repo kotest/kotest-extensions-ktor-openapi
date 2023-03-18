@@ -30,6 +30,7 @@ val defaultTracer = Tracer()
  * @authentication authentication providers detected on this route
  */
 data class Trace(
+   val testName: String,
    val method: HttpMethod,
    var path: String,
    var pathParameters: List<String>,
@@ -43,8 +44,9 @@ data class Trace(
    var pathParameterExamples: Map<String, String?>,
 ) {
    companion object {
-      fun default(method: HttpMethod, path: String) =
+      fun default(testName: String, method: HttpMethod, path: String) =
          Trace(
+            testName = testName,
             method = method,
             path = path,
             pathParameters = emptyList(),

@@ -1,5 +1,7 @@
 package io.kotest.extensions.ktor.openapi
 
+import io.kotest.core.names.TestName
+import io.kotest.core.test.TestContext
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.OutgoingContent
@@ -18,6 +20,7 @@ import io.ktor.utils.io.jvm.javaio.copyTo
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.coroutines.coroutineContext
 
 /**
  * Config class used by the plugin.
@@ -56,7 +59,7 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
    }
 
    on(CallSetup) { call ->
-      call.attributes.put(traceKey, Trace.default(call.request.httpMethod, ""))
+      call.attributes.put(traceKey, Trace.default("", call.request.httpMethod, ""))
    }
 
    on(ResponseSent) { call ->
