@@ -31,13 +31,17 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
             is AuthenticationMethod.Header -> {
                scheme.type = SecurityScheme.Type.APIKEY
                scheme.`in` = SecurityScheme.In.HEADER
-               scheme.name = auth.name
+               scheme.name = auth.headerName
             }
 
             is AuthenticationMethod.Bearer -> {
                scheme.type = SecurityScheme.Type.HTTP
                scheme.scheme = "bearer"
-               scheme.name = auth.name
+            }
+
+            is AuthenticationMethod.CustomAuthorization -> {
+               scheme.type = SecurityScheme.Type.HTTP
+               scheme.scheme = auth.scheme
             }
          }
          api.components.addSecuritySchemes(authenticator.key, scheme)
