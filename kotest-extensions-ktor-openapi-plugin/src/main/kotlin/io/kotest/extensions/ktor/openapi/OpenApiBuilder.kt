@@ -72,6 +72,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
 
          val op = Operation()
          op.description = tracesByMethod.firstNotNullOfOrNull { it.description }
+         op.summary = op.description
          op.deprecated = tracesByMethod.any { it.deprecated }
          op.responses = ApiResponses()
          op.parameters = mutableListOf()
