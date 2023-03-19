@@ -1,7 +1,5 @@
 package io.kotest.extensions.ktor.openapi
 
-import io.kotest.core.names.TestName
-import io.kotest.core.test.TestContext
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.OutgoingContent
@@ -11,7 +9,6 @@ import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.hooks.CallSetup
 import io.ktor.server.application.hooks.ResponseBodyReadyForSend
 import io.ktor.server.application.hooks.ResponseSent
-import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.request.httpMethod
 import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
@@ -20,7 +17,6 @@ import io.ktor.utils.io.jvm.javaio.copyTo
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlin.coroutines.coroutineContext
 
 /**
  * Config class used by the plugin.
@@ -51,12 +47,11 @@ val KotestOpenApi = createApplicationPlugin("OpenApi", createConfiguration = ::O
       val trace = call.attributes[traceKey]
       trace.path = call.route.path()
       trace.pathParameters = call.route.pathParameters()
-      val a = call.route.authentication()
       trace.authentication = call.route.authentication()
    }
 
-   on(AuthenticationChecked) {
-   }
+//   on(AuthenticationChecked) {
+//   }
 
    on(CallSetup) { call ->
       call.attributes.put(traceKey, Trace.default("", call.request.httpMethod, ""))

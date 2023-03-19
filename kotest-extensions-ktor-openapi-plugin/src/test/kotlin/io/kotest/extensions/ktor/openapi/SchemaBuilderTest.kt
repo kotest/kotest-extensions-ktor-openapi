@@ -139,6 +139,23 @@ class SchemaBuilderTest : FunSpec() {
          expected.name = Foo::class.java.name
          Foo::class.toSchema() shouldBe expected
       }
+
+      test("handle recursive types") {
+         data class Foo(val a: List<Foo>)
+
+         val list = Schema<Any>()
+         list.type = "array"
+         list.items = Schema<Any>()
+         list.items.`$ref` = "#/components/schemas/" + Foo::class.java.name
+
+         val expected = Schema<Foo>()
+         expected.type = "object"
+         expected.addProperty("a", list)
+         expected.name = Foo::class.java.name
+
+         Foo::class.toSchema()!!.properties["a"] shouldBe list
+         Foo::class.toSchema() shouldBe expected
+      }
    }
 }
 

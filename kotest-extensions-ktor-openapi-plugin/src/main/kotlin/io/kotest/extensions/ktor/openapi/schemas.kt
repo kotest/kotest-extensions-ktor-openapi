@@ -15,10 +15,10 @@ object SwaggerSchemas {
    val obj = Schema<String>().apply { type = "object" }
 }
 
-fun KClass<*>.toSchema() = this.createType().toSchema()
+fun KClass<*>.toSchema() = createSchema(this.createType(), mutableMapOf())
 
-fun KType.toSchema(): Schema<*>? {
-   return when (this) {
+fun createSchema(type: KType, schemas: MutableMap<String, Schema<*>>): Schema<*>? {
+   return when (type) {
       typeOf<String>() -> SwaggerSchemas.string
       typeOf<Int>() -> SwaggerSchemas.integer
       typeOf<Long>() -> SwaggerSchemas.integer
@@ -26,23 +26,27 @@ fun KType.toSchema(): Schema<*>? {
       typeOf<Double>() -> SwaggerSchemas.number
       typeOf<Boolean>() -> SwaggerSchemas.boolean
       else -> {
-         when (val classifier = this.classifier) {
+         when (val classifier = type.classifier) {
             is KClass<*> -> {
-               when (classifier) {
-
+               val seen = schemas[classifier.java.name]
+               if (seen != null) {
+                  val s = Schema<Any>()
+                  s.`$ref` = "#/components/schemas/" + classifier.java.name
+                  s
+               } else when (classifier) {
                   List::class -> {
-                     val valueType = arguments[0].type?.classifier as KClass<*>
+                     val valueType = type.arguments[0].type?.classifier as KClass<*>
                      val s = Schema<Any>()
                      s.type = "array"
-                     s.items = valueType.toSchema()
+                     s.items = createSchema(valueType.createType(), schemas)
                      s
                   }
 
                   Map::class -> {
-                     val valueType = arguments[1].type?.classifier as KClass<*>
+                     val valueType = type.arguments[1].type?.classifier as KClass<*>
                      val s = Schema<Any>()
                      s.type = "object"
-                     s.additionalProperties = valueType.toSchema()
+                     s.additionalProperties = createSchema(valueType.createType(), schemas)
                      s
                   }
 
@@ -58,20 +62,23 @@ fun KType.toSchema(): Schema<*>? {
                         val schema = Schema<Any>()
                         schema.name = classifier.java.name
                         schema.type = "object"
+                        schemas[classifier.java.name] = schema
                         classifier.memberProperties.map { prop ->
-                           val propSchema = prop.returnType.toSchema()
+                           val propSchema = createSchema(prop.returnType, schemas)
                            schema.addProperty(prop.name, propSchema)
                         }
                         schema
                      } else if (classifier.isSealed) {
-                        val schemas = classifier.sealedSubclasses.map { it.toSchema() }
+                        val subschemas = classifier.sealedSubclasses.map {
+                           createSchema(it.createType(), schemas)
+                        }
                         val schema = Schema<Any>()
                         schema.name = classifier.java.name
                         schema.type = "object"
-                        schema.anyOf(schemas)
+                        schema.anyOf(subschemas)
                         schema
                      } else {
-                       null
+                        null
                      }
                   }
                }
