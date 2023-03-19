@@ -53,6 +53,7 @@ class SchemaRegistry {
                      classifier == Boolean::class -> SwaggerSchemas.boolean
 
                      classifier == List::class -> buildLists(type)
+                     classifier == Set::class -> buildLists(type)
 
                      classifier == Map::class -> buildMaps(type)
                      classifier.isData -> {

@@ -99,6 +99,35 @@ class SchemaBuilderTest : FunSpec() {
          Foo::class.toSchema() shouldBe expected
       }
 
+      test("support primitive sets") {
+         data class Foo(val a: Set<String>)
+
+         val listSchema = Schema<Any>()
+         listSchema.type = "array"
+         listSchema.items = SwaggerSchemas.string
+
+         val expected = Schema<Foo>()
+         expected.type = "object"
+         expected.addProperty("a", listSchema)
+         expected.name = Foo::class.java.name
+         Foo::class.toSchema() shouldBe expected
+      }
+
+      test("support complex sets") {
+         data class Bar(val b: Boolean)
+         data class Foo(val a: Set<Bar>)
+
+         val listSchema = Schema<Any>()
+         listSchema.type = "array"
+         listSchema.items = Bar::class.schema()
+
+         val expected = Schema<Foo>()
+         expected.type = "object"
+         expected.addProperty("a", listSchema)
+         expected.name = Foo::class.java.name
+         Foo::class.toSchema() shouldBe expected
+      }
+
       test("support primitive maps") {
          data class Foo(val a: Map<String, String>)
 
