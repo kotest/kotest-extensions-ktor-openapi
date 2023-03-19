@@ -69,6 +69,21 @@ class SchemaRegistry {
                         ref
                      }
 
+                     classifier.objectInstance != null -> {
+
+                        // need to put object first, then build it, to stop stack overflow
+                        if (!schemas.containsKey(classifier.java.name)) {
+                           val schema = Schema<Any>()
+                           schema.type = "object"
+                           schema.name = classifier.java.name
+                           schemas[classifier.java.name] = schema
+                        }
+
+                        val ref = Schema<Any>()
+                        ref.`$ref` = classifier.ref()
+                        ref
+                     }
+
                      else -> throw UnsupportedOperationException("Unsupported kclass $classifier")
                   }
                }

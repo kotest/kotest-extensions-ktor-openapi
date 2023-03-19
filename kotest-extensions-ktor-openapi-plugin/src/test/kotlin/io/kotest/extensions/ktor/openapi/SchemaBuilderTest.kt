@@ -143,10 +143,40 @@ class SchemaBuilderTest : FunSpec() {
          Foo::class.toSchema().properties["a"] shouldBe list
          Foo::class.toSchema() shouldBe expected
       }
+
+      test("handle objects in sealed interfaces") {
+         data class Foo(val a: BubbleBobble)
+
+         val bubbleSchema = Schema<BubbleBobble.Bubble>()
+         bubbleSchema.type = "object"
+         bubbleSchema.addProperty("a", SwaggerSchemas.string)
+         bubbleSchema.name = BubbleBobble.Bubble::class.java.name
+
+         val bobbleSchema = Schema<BubbleBobble.Bobble>()
+         bobbleSchema.type = "object"
+         bobbleSchema.name = BubbleBobble.Bobble::class.java.name
+
+         val bubbleBobbleSchema = Schema<BubbleBobble>()
+         bubbleBobbleSchema.type = "object"
+         bubbleBobbleSchema.anyOf(listOf(BubbleBobble.Bubble::class.schema(), BubbleBobble.Bobble::class.schema()))
+         bubbleBobbleSchema.name = BubbleBobble::class.java.name
+
+         val foo = Schema<Foo>()
+         foo.type = "object"
+         foo.addProperty("a", BubbleBobble::class.schema())
+         foo.name = Foo::class.java.name
+
+         Foo::class.toSchema() shouldBe foo
+      }
    }
 }
 
 sealed interface Wibble {
    data class Bar(val a: String, val b: Boolean) : Wibble
    data class Baz(val c: Double, val d: Float) : Wibble
+}
+
+sealed interface BubbleBobble {
+   data class Bubble(val a: String) : BubbleBobble
+   object Bobble : BubbleBobble
 }
