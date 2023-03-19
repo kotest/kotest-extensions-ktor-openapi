@@ -15,6 +15,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
+import io.swagger.v3.oas.models.servers.Server
 
 class OpenApiBuilder(private val config: OpenApiConfig) {
 
@@ -24,6 +25,12 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
       api.info.summary = config.serviceDescription
       api.info.title = config.serviceTitle ?: "service-title"
       api.info.version = config.serviceVersion ?: "0.0.0"
+      api.servers = config.servers.map { server ->
+         Server().also {
+            it.url = server.url
+            it.description = server.description
+         }
+      }
       api.components = Components()
       config.authentications.forEach { authenticator ->
          val scheme = SecurityScheme()
@@ -112,8 +119,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                      } else if (bodies.size > 1) {
                         bodies.withIndex().forEach { (index, value) ->
                            mediaType.addExamples(
-                              "Example ${index + 1}",
-                              Example().value(value)
+                              "Example ${index + 1}", Example().value(value)
                            )
                         }
                      }
@@ -129,9 +135,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
          // so we can add just once
          tracesByMethod.first().pathParameters.forEach {
             op.addParametersItem(
-               Parameter()
-                  .name(it)
-                  .`in`("path")
+               Parameter().name(it).`in`("path")
             )
          }
 
