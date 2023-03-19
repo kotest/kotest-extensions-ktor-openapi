@@ -39,6 +39,11 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
                scheme.scheme = "bearer"
             }
 
+            is AuthenticationMethod.Basic -> {
+               scheme.type = SecurityScheme.Type.HTTP
+               scheme.scheme = "basic"
+            }
+
             is AuthenticationMethod.CustomAuthorization -> {
                scheme.type = SecurityScheme.Type.HTTP
                scheme.scheme = auth.scheme

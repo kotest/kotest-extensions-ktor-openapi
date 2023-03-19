@@ -41,6 +41,22 @@ class WriterAuthenticationMethodTest : FunSpec() {
       scheme: bearer"""
       }
 
+      test("support basic authentications") {
+         val file = Files.createTempFile("openapi", "test")
+         val builder = OpenApiBuilder(
+            OpenApiConfig(
+               path = file,
+               authentications = mapOf("foo" to AuthenticationMethod.Basic("myrealm"))
+            )
+         )
+         OpenApiWriter(file).write(builder)
+         file.readText() shouldInclude """components:
+  securitySchemes:
+    foo:
+      type: http
+      scheme: basic"""
+      }
+
       test("support custom authorization schemes") {
          val file = Files.createTempFile("openapi", "test")
          val builder = OpenApiBuilder(
