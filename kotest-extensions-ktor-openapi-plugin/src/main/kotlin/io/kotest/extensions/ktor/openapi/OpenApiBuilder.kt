@@ -21,6 +21,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
    val openapi = OpenAPI().also { api ->
       api.info = Info()
       api.info.description = config.serviceDescription
+      api.info.summary = config.serviceDescription
       api.info.title = config.serviceTitle ?: "service-title"
       api.info.version = config.serviceVersion ?: "0.0.0"
       api.components = Components()
