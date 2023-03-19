@@ -15,7 +15,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
-import io.swagger.v3.oas.models.servers.Server
 
 class OpenApiBuilder(private val config: OpenApiConfig) {
 
@@ -23,15 +22,10 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
       api.info = Info()
       api.info.description = config.serviceDescription
       api.info.summary = config.serviceDescription
-      api.info.contact = config.contact
+      config.contact?.let { api.info.contact = it }
       api.info.title = config.serviceTitle ?: "service-title"
       api.info.version = config.serviceVersion ?: "0.0.0"
-      api.servers = config.servers.map { server ->
-         Server().also {
-            it.url = server.url
-            it.description = server.description
-         }
-      }
+      api.servers = config.servers
       api.components = Components()
       config.authentications.forEach { authenticator ->
          val scheme = SecurityScheme()

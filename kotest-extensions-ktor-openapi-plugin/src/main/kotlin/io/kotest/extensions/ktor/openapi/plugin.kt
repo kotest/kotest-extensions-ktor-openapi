@@ -14,6 +14,8 @@ import io.ktor.server.routing.Routing
 import io.ktor.util.AttributeKey
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.jvm.javaio.copyTo
+import io.swagger.v3.oas.models.info.Contact
+import io.swagger.v3.oas.models.servers.Server
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -29,8 +31,8 @@ class OpenApiConfig(
    var serviceTitle: String? = null,
    var serviceVersion: String? = null,
    var serviceDescription: String? = null,
-   var contact: String? = null,
-   var servers: List<TargetServer> = emptyList(),
+   var contact: Contact? = null,
+   var servers: List<Server> = emptyList(),
    var authentications: Map<String, AuthenticationMethod> = emptyMap(),
 )
 
