@@ -23,6 +23,7 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
       api.info = Info()
       api.info.description = config.serviceDescription
       api.info.summary = config.serviceDescription
+      api.info.contact = config.contact
       api.info.title = config.serviceTitle ?: "service-title"
       api.info.version = config.serviceVersion ?: "0.0.0"
       api.servers = config.servers.map { server ->

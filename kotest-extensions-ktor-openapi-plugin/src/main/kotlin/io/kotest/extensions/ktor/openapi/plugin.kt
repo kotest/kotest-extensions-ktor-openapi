@@ -29,6 +29,7 @@ class OpenApiConfig(
    var serviceTitle: String? = null,
    var serviceVersion: String? = null,
    var serviceDescription: String? = null,
+   var contact: String? = null,
    var servers: List<TargetServer> = emptyList(),
    var authentications: Map<String, AuthenticationMethod> = emptyMap(),
 )
