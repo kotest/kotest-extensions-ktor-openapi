@@ -30,6 +30,8 @@ class SchemaRegistry {
    private fun schema(type: KType): Schema<*> {
       return when (type) {
          typeOf<String>() -> SwaggerSchemas.string
+         typeOf<Byte>() -> SwaggerSchemas.integer
+         typeOf<Short>() -> SwaggerSchemas.integer
          typeOf<Int>() -> SwaggerSchemas.integer
          typeOf<Long>() -> SwaggerSchemas.integer
          typeOf<Float>() -> SwaggerSchemas.number
@@ -39,7 +41,19 @@ class SchemaRegistry {
             when (val classifier = type.classifier) {
                is KClass<*> -> {
                   when {
+
+
+                     classifier == String::class -> SwaggerSchemas.string
+                     classifier == Byte::class -> SwaggerSchemas.integer
+                     classifier == Short::class -> SwaggerSchemas.integer
+                     classifier == Int::class -> SwaggerSchemas.integer
+                     classifier == Long::class -> SwaggerSchemas.integer
+                     classifier == Float::class -> SwaggerSchemas.number
+                     classifier == Double::class -> SwaggerSchemas.number
+                     classifier == Boolean::class -> SwaggerSchemas.boolean
+
                      classifier == List::class -> buildLists(type)
+
                      classifier == Map::class -> buildMaps(type)
                      classifier.isData -> {
 
