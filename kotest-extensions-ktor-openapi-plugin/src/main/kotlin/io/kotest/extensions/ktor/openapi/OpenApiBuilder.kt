@@ -56,10 +56,10 @@ class OpenApiBuilder(private val config: OpenApiConfig) {
       val item = PathItem()
       openapi.path(path, item)
 
-      // add all schemas at the top level
-      traces.mapNotNull { it.schema }.forEach { schema ->
-         openapi.components.addSchemas(schema.java.name, schema.toSchema())
-      }
+      // build all schemas and register each as a component
+      val registry = SchemaRegistry()
+      traces.mapNotNull { it.schema }.forEach { registry.register(it) }
+      registry.schemas.forEach { (name, schema) -> openapi.components.addSchemas(name, schema) }
 
       // each http method is an operation
       traces.groupBy { it.method }.forEach { (method, tracesByMethod) ->
