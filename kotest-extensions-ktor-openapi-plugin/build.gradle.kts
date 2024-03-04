@@ -29,7 +29,7 @@ dependencies {
    testImplementation("io.kotest:kotest-assertions-core:5.5.5")
    testImplementation("io.ktor:ktor-server-test-host:2.2.4")
    testImplementation("io.ktor:ktor-serialization-jackson:2.2.4")
-   testImplementation("io.ktor:ktor-server-content-negotiation:2.2.4")
+   testImplementation("io.ktor:ktor-server-content-negotiation:2.3.9")
 }
 
 tasks.test {
