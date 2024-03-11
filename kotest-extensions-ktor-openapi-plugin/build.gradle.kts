@@ -23,7 +23,7 @@ dependencies {
    implementation("io.ktor:ktor-server-auth:2.2.4")
    implementation("io.swagger.parser.v3:swagger-parser:2.1.20")
    implementation("io.kotest:kotest-framework-api:5.5.5")
-   implementation("io.kotest:kotest-framework-engine:5.5.5")
+   implementation("io.kotest:kotest-framework-engine:5.8.1")
    testImplementation("io.ktor:ktor-client-apache:2.2.4")
    testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
    testImplementation("io.kotest:kotest-assertions-core:5.5.5")
