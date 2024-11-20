@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-   api("io.ktor:ktor-server-core:2.2.4")
+   api("io.ktor:ktor-server-core:2.3.13")
 }
 
 tasks.withType<KotlinCompile> {
