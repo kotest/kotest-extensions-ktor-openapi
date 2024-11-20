@@ -19,17 +19,17 @@ repositories {
 
 dependencies {
    api(projects.kotestExtensionsKtorOpenapiModel)
-   implementation("io.ktor:ktor-server-core:2.2.4")
-   implementation("io.ktor:ktor-server-auth:2.2.4")
+   implementation("io.ktor:ktor-server-core:2.3.13")
+   implementation("io.ktor:ktor-server-auth:2.3.13")
    implementation("io.swagger.parser.v3:swagger-parser:2.1.22")
    implementation("io.kotest:kotest-framework-api:5.5.5")
    implementation("io.kotest:kotest-framework-engine:5.5.5")
-   testImplementation("io.ktor:ktor-client-apache:2.2.4")
+   testImplementation("io.ktor:ktor-client-apache:2.3.13")
    testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
    testImplementation("io.kotest:kotest-assertions-core:5.5.5")
-   testImplementation("io.ktor:ktor-server-test-host:2.2.4")
-   testImplementation("io.ktor:ktor-serialization-jackson:2.2.4")
-   testImplementation("io.ktor:ktor-server-content-negotiation:2.2.4")
+   testImplementation("io.ktor:ktor-server-test-host:2.3.13")
+   testImplementation("io.ktor:ktor-serialization-jackson:2.3.13")
+   testImplementation("io.ktor:ktor-server-content-negotiation:2.3.13")
 }
 
 tasks.test {
